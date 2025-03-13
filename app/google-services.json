@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "93379839080",
+    "project_id": "bienestar-799c3",
+    "storage_bucket": "bienestar-799c3.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:93379839080:android:6ea15ee6f5b1124faf67dd",
+        "android_client_info": {
+          "package_name": "com.plataforma.bienestar"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAcXgc3TjPU5LGgX-dYUv_CTgktiBQ8ers"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
