@@ -5,24 +5,33 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import com.google.firebase.auth.FirebaseAuth
+import com.plataforma.bienestar.acceso.registro.PantallaRegistro
+import com.plataforma.bienestar.inicio.PantallaInicio
+import com.plataforma.bienestar.inicio_sesion.PantallaInicioSesion
 import com.plataforma.bienestar.ui.theme.BienestarTheme
 
-fun NavigationWrapper(){
-    @Composable
-    fun Greeting(name: String, modifier: Modifier = Modifier) {
-        Text(
-            text = "Hello $name!",
-            modifier = modifier.clickable {
-                throw RuntimeException("P")
-            }
-        )
-    }
+@Composable
+fun NavigationWrapper(
+    navHostController: NavHostController,
+    auth: FirebaseAuth
+) {
 
-    //@Preview(showBackground = true)
-    @Composable
-    fun GreetingPreview() {
-        BienestarTheme {
-            Greeting("Android")
+    NavHost(navController = navHostController, startDestination = "home") {
+        composable("inicio") {
+            PantallaInicio()
+        }
+        composable("inicio_sesion") {
+            PantallaInicioSesion()
+        }
+        composable("registro") {
+            PantallaRegistro()
+        }
+        composable("home"){
+            //HomeScreen()
         }
     }
 }
