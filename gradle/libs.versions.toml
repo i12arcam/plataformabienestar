@@ -13,6 +13,8 @@ services = "4.4.2"
 crashlytics = "3.0.2"
 navigationCompose = "2.7.7"
 
+google-play-services-auth = "20.2.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -32,6 +34,8 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
 firebase-crashlytics = {module = "com.google.firebase:firebase-crashlytics" }
 firebase-auth = {module = "com.google.firebase:firebase-auth-ktx" }
+
+google-play-services-auth = { group = "com.google.android.gms", name = "play-services-auth", version.ref = "google-play-services-auth" }
 
 androidx-navigation-compose = {module = "androidx.navigation:navigation-compose" , version.ref = "navigationCompose"}
 

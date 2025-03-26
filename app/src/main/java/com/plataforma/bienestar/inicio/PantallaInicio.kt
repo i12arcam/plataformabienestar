@@ -2,6 +2,7 @@ package com.plataforma.bienestar.inicio
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +36,11 @@ import com.plataforma.bienestar.ui.theme.Green
 
 @Preview
 @Composable
-fun PantallaInicio(navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Unit = {}) {
+fun PantallaInicio(
+    navigateToLogin: () -> Unit = {},
+    navigateToSignUp: () -> Unit = {},
+    navigateToGoogleSignIn: () -> Unit = {}
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -67,11 +72,13 @@ fun PantallaInicio(navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Uni
                 .padding(horizontal = 32.dp),
             colors = ButtonDefaults.buttonColors(containerColor = Green)
         ) {
-            Text(text = "Sign up free", color = Black, fontWeight = FontWeight.Bold)
+            Text(text = "Registrarse", color = Black, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(8.dp))
         CustomButton(
-            Modifier.clickable { }, painterResource(id = R.drawable.cat), "Continue with Google"
+            modifier = Modifier.clickable { navigateToGoogleSignIn() },
+            painterResource(id = R.drawable.cat),
+            "Continuar con Google"
         )
         Spacer(modifier = Modifier.height(8.dp))
         CustomButton(
@@ -80,11 +87,11 @@ fun PantallaInicio(navigateToLogin: () -> Unit = {}, navigateToSignUp: () -> Uni
             "Continue with Facebook"
         )
         Text(
-            text = "Log In",
+            text = "Iniciar Sesión",
             color = Color.White,
             modifier = Modifier
                 .padding(24.dp)
-                .clickable { navigateToLogin() },
+                .clickable {navigateToLogin() },
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.weight(1f))
@@ -97,9 +104,9 @@ fun CustomButton(modifier: Modifier, painter: Painter, title: String) {
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .padding(horizontal = 32.dp),
-            //.background(BackgroundButton)
-            //.border(2.dp, ShapeButton, CircleShape),
+            .padding(horizontal = 32.dp)
+            .background(Black)
+            .border(2.dp, Black, CircleShape),
         contentAlignment = Alignment.CenterStart
     ) {
         Image(
