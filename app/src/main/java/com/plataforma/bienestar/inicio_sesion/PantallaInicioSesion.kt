@@ -2,6 +2,7 @@ package com.plataforma.bienestar.inicio_sesion
 
 import android.util.Log
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,13 +29,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.plataforma.bienestar.R
 import com.plataforma.bienestar.ui.theme.Black
 import com.plataforma.bienestar.ui.theme.Gray
 
 @Composable
-fun PantallaInicioSesion(auth: FirebaseAuth) {
+fun PantallaInicioSesion(
+    auth: FirebaseAuth,
+    navController: NavHostController
+)
+{
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -52,6 +58,7 @@ fun PantallaInicioSesion(auth: FirebaseAuth) {
                 contentDescription = "",
                 tint = White,
                 modifier = Modifier
+                    .clickable { navController.popBackStack() }
                     .padding(vertical = 24.dp)
                     .size(24.dp)
             )
@@ -82,7 +89,9 @@ fun PantallaInicioSesion(auth: FirebaseAuth) {
         Button(onClick = {
             auth.signInWithEmailAndPassword(email, password).addOnCompleteListener{ task ->
                 if(task.isSuccessful){
-                    //navigateToHome()
+                    navController.navigate("home") {
+                        popUpTo("inicio_sesion") { inclusive = true }
+                    }
                     Log.i("aris", "LOGIN OK")
                 }else{
                     //Error

@@ -12,7 +12,20 @@
           "package_name": "com.plataforma.bienestar"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "93379839080-3ii6a5keo44b4sfq8bv4cgot477ot7p2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.plataforma.bienestar",
+            "certificate_hash": "7d1c274d2069df6032e0e4e8bec03f9ba053d545"
+          }
+        },
+        {
+          "client_id": "93379839080-rsvuh26tjtfsngvnbi1ua22v1h7vevas.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyAcXgc3TjPU5LGgX-dYUv_CTgktiBQ8ers"
@@ -20,7 +33,12 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "93379839080-rsvuh26tjtfsngvnbi1ua22v1h7vevas.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         }
       }
     }

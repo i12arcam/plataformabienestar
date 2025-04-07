@@ -39,7 +39,7 @@ import com.plataforma.bienestar.ui.theme.Green
 fun PantallaInicio(
     navigateToLogin: () -> Unit = {},
     navigateToSignUp: () -> Unit = {},
-    navigateToGoogleSignIn: () -> Unit = {}
+    onGoogleSignInClick: () -> Unit = {}
 ) {
     Column(
         modifier = Modifier
@@ -76,7 +76,7 @@ fun PantallaInicio(
         }
         Spacer(modifier = Modifier.height(8.dp))
         CustomButton(
-            modifier = Modifier.clickable { navigateToGoogleSignIn() },
+            modifier = Modifier.clickable(onClick = onGoogleSignInClick),
             painterResource(id = R.drawable.cat),
             "Continuar con Google"
         )

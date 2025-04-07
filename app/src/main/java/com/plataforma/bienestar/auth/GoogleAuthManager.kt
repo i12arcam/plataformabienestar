@@ -1,58 +1,113 @@
 package com.plataforma.bienestar.auth
 
-import android.app.Activity
-import android.content.Intent
+import android.content.Context
 import android.util.Log
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
+import androidx.credentials.ClearCredentialStateRequest
+import androidx.credentials.Credential
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.ClearCredentialException
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.lifecycle.lifecycleScope
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.auth.auth
+import com.google.firebase.Firebase
+import com.plataforma.bienestar.R
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
-class GoogleAuthManager(private val activity: Activity) {
+class GoogleAuthManager(private val context: Context, private val coroutineScope: CoroutineScope) {
 
-    private val auth: FirebaseAuth = FirebaseAuth.getInstance()
+    private val auth: FirebaseAuth = Firebase.auth
+    private val credentialManager: CredentialManager = CredentialManager.create(context)
 
-    companion object {
-        const val RC_SIGN_IN = 9001
-    }
+    fun checkCurrentUser(): FirebaseUser? = auth.currentUser
 
-    private val googleSignInClient: GoogleSignInClient by lazy {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken("93379839080-rsvuh26tjtfsngvnbi1ua22v1h7vevas.apps.googleusercontent.com") // Reemplaza con tu Web Client ID de Firebase
-            .requestEmail()
+    fun launchSignIn(
+        onSuccess: (FirebaseUser) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        val googleIdOption = GetGoogleIdOption.Builder()
+            .setServerClientId(context.getString(R.string.default_web_client_id))
+            .setFilterByAuthorizedAccounts(true)
             .build()
-        GoogleSignIn.getClient(activity, gso)
-    }
 
-    fun signInWithGoogle(onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
-        val signInIntent = googleSignInClient.signInIntent
-        activity.startActivityForResult(signInIntent, RC_SIGN_IN)
-    }
+        val request = GetCredentialRequest.Builder()
+            .addCredentialOption(googleIdOption)
+            .build()
 
-    fun handleSignInResult(requestCode: Int, data: Intent?, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
-        if (requestCode == RC_SIGN_IN) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(data)
+        coroutineScope.launch {
             try {
-                val account = task.getResult(ApiException::class.java)!!
-                firebaseAuthWithGoogle(account.idToken!!, onSuccess, onFailure)
-            } catch (e: ApiException) {
-                onFailure("Error al iniciar sesión: ${e.statusCode}")
+                val result = credentialManager.getCredential(
+                    context = context,
+                    request = request
+                )
+                handleSignIn(result.credential, onSuccess, onFailure)
+            } catch (e: GetCredentialException) {
+                Log.e(TAG, "Couldn't retrieve user's credentials: ${e.localizedMessage}")
+                onFailure("Couldn't retrieve credentials: ${e.localizedMessage}")
             }
         }
     }
 
-    private fun firebaseAuthWithGoogle(idToken: String, onSuccess: (String) -> Unit, onFailure: (String) -> Unit) {
+    private fun handleSignIn(
+        credential: Credential,
+        onSuccess: (FirebaseUser) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
+        if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+            firebaseAuthWithGoogle(googleIdTokenCredential.idToken, onSuccess, onFailure)
+        } else {
+            Log.w(TAG, "Credential is not of type Google ID!")
+            onFailure("Credential is not of type Google ID!")
+        }
+    }
+
+    private fun firebaseAuthWithGoogle(
+        idToken: String,
+        onSuccess: (FirebaseUser) -> Unit,
+        onFailure: (String) -> Unit
+    ) {
         val credential = GoogleAuthProvider.getCredential(idToken, null)
         auth.signInWithCredential(credential)
-            .addOnCompleteListener(activity) { task ->
+            .addOnCompleteListener { task ->
                 if (task.isSuccessful) {
+                    Log.d(TAG, "signInWithCredential:success")
                     val user = auth.currentUser
-                    onSuccess("Inicio de sesión exitoso: ${user?.displayName}")
+                    if (user != null) {
+                        onSuccess(user)
+                    } else {
+                        onFailure("User is null after successful sign in")
+                    }
                 } else {
-                    onFailure("Error autenticando en Firebase")
+                    Log.w(TAG, "signInWithCredential:failure", task.exception)
+                    onFailure(task.exception?.localizedMessage ?: "Unknown error")
                 }
             }
+    }
+
+    fun signOut(onComplete: () -> Unit) {
+        auth.signOut()
+        coroutineScope.launch {
+            try {
+                val clearRequest = ClearCredentialStateRequest()
+                credentialManager.clearCredentialState(clearRequest)
+                onComplete()
+            } catch (e: ClearCredentialException) {
+                Log.e(TAG, "Couldn't clear user credentials: ${e.localizedMessage}")
+                onComplete()
+            }
+        }
+    }
+
+    companion object {
+        private const val TAG = "GoogleAuthManager"
     }
 }
