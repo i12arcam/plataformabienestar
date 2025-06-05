@@ -7,7 +7,6 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
@@ -15,9 +14,8 @@ import androidx.navigation.compose.rememberNavController
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
-import com.plataforma.bienestar.auth.GoogleAuthManager
+import com.plataforma.bienestar.acceso.registro.auth.GoogleAuthManager
 import com.plataforma.bienestar.ui.theme.BienestarTheme
-import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     private var navHostController: NavHostController? = null

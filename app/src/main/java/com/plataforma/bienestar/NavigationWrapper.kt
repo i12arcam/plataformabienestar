@@ -7,10 +7,10 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.google.firebase.auth.FirebaseAuth
 import com.plataforma.bienestar.acceso.registro.PantallaRegistro
-import com.plataforma.bienestar.auth.GoogleAuthManager
+import com.plataforma.bienestar.acceso.registro.auth.GoogleAuthManager
 import com.plataforma.bienestar.home.PantallaHome
-import com.plataforma.bienestar.inicio.PantallaInicio
-import com.plataforma.bienestar.inicio_sesion.PantallaInicioSesion
+import com.plataforma.bienestar.acceso.registro.inicio.PantallaInicio
+import com.plataforma.bienestar.acceso.registro.inicio_sesion.PantallaInicioSesion
 
 @Composable
 fun NavigationWrapper(

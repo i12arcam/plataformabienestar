@@ -1,4 +1,4 @@
-package com.plataforma.bienestar.inicio
+package com.plataforma.bienestar.acceso.registro.inicio
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

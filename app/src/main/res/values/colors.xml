@@ -7,4 +7,10 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+
+    <color name="mainGreen">#7DCB90</color> <!-- Color Verde Arriba y Abajo-->
+    <color name="backgroundGreen">#E3FAD9</color> <!-- Color Verde Fondo-->
+    <color name="darkGreen">#3E7B40</color> <!-- Color Verde Icono Seleccionado -->
+    <color name="grayBlue">#8AA0B2</color> <!-- Color Azul Título-->
+    <color name="lightPurple">#BBB1CA</color> <!-- Color Morado Fondo Elementos-->
 </resources>
