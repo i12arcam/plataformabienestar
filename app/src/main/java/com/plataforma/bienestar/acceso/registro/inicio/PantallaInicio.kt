@@ -30,8 +30,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.plataforma.bienestar.R
+import com.plataforma.bienestar.ui.theme.BackgroundGreen
+import com.plataforma.bienestar.ui.theme.LightPurple
 import com.plataforma.bienestar.ui.theme.Black
 import com.plataforma.bienestar.ui.theme.Gray
+import com.plataforma.bienestar.ui.theme.GrayBlue
 import com.plataforma.bienestar.ui.theme.Green
 
 @Preview
@@ -44,24 +47,26 @@ fun PantallaInicio(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Brush.verticalGradient(listOf(Gray, Black), startY = 0f, endY = 600f)),
+            .background(GrayBlue),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.weight(1f))
         Image(
-            painter = painterResource(id = R.drawable.cat),
+            painter = painterResource(id = R.drawable.mindauralogo),
             contentDescription = "",
-            modifier = Modifier.clip(CircleShape)
+            modifier = Modifier.
+                clip(CircleShape)
+                .size(140.dp)
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            "Millions of songs.",
+            "Conecta contigo mismo",
             color = Color.White,
-            fontSize = 38.sp,
+            fontSize = 34.sp,
             fontWeight = FontWeight.Bold
         )
         Text(
-            "Free on Spotify", color = Color.White, fontSize = 38.sp, fontWeight = FontWeight.Bold
+            "Supérate", color = Color.White, fontSize = 38.sp, fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.weight(1f))
         Button(
@@ -70,21 +75,21 @@ fun PantallaInicio(
                 .fillMaxWidth()
                 .height(48.dp)
                 .padding(horizontal = 32.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = Green)
+            colors = ButtonDefaults.buttonColors(containerColor = BackgroundGreen)
         ) {
             Text(text = "Registrarse", color = Black, fontWeight = FontWeight.Bold)
         }
         Spacer(modifier = Modifier.height(8.dp))
         CustomButton(
             modifier = Modifier.clickable(onClick = onGoogleSignInClick),
-            painterResource(id = R.drawable.cat),
+            painterResource(id = R.drawable.googleicon),
             "Continuar con Google"
         )
         Spacer(modifier = Modifier.height(8.dp))
         CustomButton(
             Modifier.clickable { },
-            painterResource(id = R.drawable.cat),
-            "Continue with Facebook"
+            painterResource(id = R.drawable.googleicon),
+            "Continuar con Facebook"
         )
         Text(
             text = "Iniciar Sesión",
@@ -105,8 +110,9 @@ fun CustomButton(modifier: Modifier, painter: Painter, title: String) {
             .fillMaxWidth()
             .height(48.dp)
             .padding(horizontal = 32.dp)
-            .background(Black)
+            .background(Green)
             .border(2.dp, Black, CircleShape),
+
         contentAlignment = Alignment.CenterStart
     ) {
         Image(

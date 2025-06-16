@@ -2,6 +2,9 @@ package com.plataforma.bienestar.home
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -21,6 +24,7 @@ fun PantallaHome(
     onTabSelected: (String) -> Unit = {} // Nueva función para manejar tabs
 ) {
     var selectedTab by remember { mutableStateOf("home") } // Estado para el tab seleccionado
+    var searchText by remember { mutableStateOf("") } // Estado para el texto de búsqueda
 
     BaseScreen(
         selectedTab = selectedTab,
@@ -32,7 +36,34 @@ fun PantallaHome(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-            ) {
+            ) {// Barra de búsqueda
+                TextField(
+                    value = searchText,
+                    onValueChange = { searchText = it },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .heightIn(min = 56.dp),
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Buscar"
+                        )
+                    },
+                    placeholder = {
+                        Text(text = "Buscar contenido...")
+                    },
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.White,
+                        unfocusedContainerColor = Color.White,
+                        disabledContainerColor = Color.White,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        disabledIndicatorColor = Color.Transparent
+                    ),
+                    shape = RoundedCornerShape(28.dp), // Bordes muy redondeados
+                    singleLine = true
+                )
                 // Rectángulo superior (Título)
                 Box(
                     modifier = Modifier
