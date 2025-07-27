@@ -78,4 +78,12 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+
+    // Retrofit
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson.converter)
+    // Coroutines
+    implementation(libs.coroutines.android)
+    // Gson
+    implementation(libs.gson)
 }

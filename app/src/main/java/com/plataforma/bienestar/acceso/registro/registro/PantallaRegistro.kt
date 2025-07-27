@@ -1,4 +1,4 @@
-package com.plataforma.bienestar.acceso.registro.inicio_sesion
+package com.plataforma.bienestar.acceso.registro.registro
 
 import android.util.Log
 import androidx.compose.foundation.background
@@ -31,19 +31,20 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.plataforma.bienestar.R
+import com.plataforma.bienestar.data.api.ApiClient
+import com.plataforma.bienestar.data.api.model.Usuario
 import com.plataforma.bienestar.ui.theme.BackgroundGreen
-import com.plataforma.bienestar.ui.theme.Black
 import com.plataforma.bienestar.ui.theme.DarkGreen
-import com.plataforma.bienestar.ui.theme.Gray
 import com.plataforma.bienestar.ui.theme.MainGreen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
-fun PantallaInicioSesion(
-    auth: FirebaseAuth,
-    navController: NavHostController
-)
-{
+fun PantallaRegistro(auth: FirebaseAuth, navController: NavHostController) {
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -105,20 +106,53 @@ fun PantallaInicioSesion(
                 containerColor = DarkGreen
             ),
             onClick = {
-            auth.signInWithEmailAndPassword(email, password).addOnCompleteListener{ task ->
-                if(task.isSuccessful){
-                    navController.navigate("home") {
-                        popUpTo("inicio_sesion") { inclusive = true }
+                // 1. Registro en Firebase
+                auth.createUserWithEmailAndPassword(email, password)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            val firebaseUser = auth.currentUser
+
+                            // Actualizar el perfil del usuario con el nombre
+                            val profileUpdates = UserProfileChangeRequest.Builder()
+                                .setDisplayName(name)  // Aquí asignas el nombre
+                                .build()
+
+                            firebaseUser?.updateProfile(profileUpdates)
+                                ?.addOnCompleteListener { updateTask ->
+                                    if (updateTask.isSuccessful) {
+                                        Log.d("Registro", "Nombre actualizado en Firebase Auth")
+
+                                        // Ahora puedes proceder con el registro en tu backend
+                                        val userId = firebaseUser.uid
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            try {
+                                                ApiClient.apiService.createUser(
+                                                    Usuario(
+                                                        firebaseUID = userId,
+                                                        nombre = name,
+                                                        email = email
+                                                    )
+                                                )
+                                                withContext(Dispatchers.Main) {
+                                                    navController.navigate("home") {
+                                                        popUpTo("registro") { inclusive = true }
+                                                    }
+                                                }
+                                            } catch (e: Exception) {
+                                                Log.e("Registro", "Error en backend: ${e.message}")
+                                            }
+                                        }
+                                    } else {
+                                        Log.e("Registro", "Error al actualizar nombre: ${updateTask.exception?.message}")
+                                    }
+                                }
+                        } else {
+                            Log.e("Registro", "Error en Firebase: ${task.exception?.message}")
+                        }
                     }
-                    Log.i("aris", "LOGIN OK")
-                }else{
-                    //Error
-                    Log.i("aris", "LOGIN KO")
-                }
             }
-        }) {
-            Text(text = "Iniciar Sesión")
+        ) {
+            Text(text = "Registrarse")
         }
     }
 }
-

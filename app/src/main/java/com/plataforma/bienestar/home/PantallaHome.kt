@@ -1,5 +1,6 @@
 package com.plataforma.bienestar.home
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.plataforma.bienestar.data.api.ApiClient
 import com.plataforma.bienestar.ui.theme.BienestarTheme
 import com.plataforma.bienestar.ui.theme.GrayBlue
 import com.plataforma.bienestar.ui.theme.LightPurple
@@ -21,10 +23,32 @@ import com.plataforma.bienestar.ui.theme.LightPurple
 fun PantallaHome(
     onLogout: () -> Unit,
     userName: String? = null,
-    onTabSelected: (String) -> Unit = {} // Nueva función para manejar tabs
+    onTabSelected: (String) -> Unit = {},
+    idUsuario: String
 ) {
-    var selectedTab by remember { mutableStateOf("home") } // Estado para el tab seleccionado
-    var searchText by remember { mutableStateOf("") } // Estado para el texto de búsqueda
+    var selectedTab by remember { mutableStateOf("home") }
+    var searchText by remember { mutableStateOf("") }
+
+    // Estados para el consejo
+    var consejoNombre by remember { mutableStateOf("Título Consejo") }
+    var consejoContenido by remember { mutableStateOf("Descripción Consejo") }
+    var isLoading by remember { mutableStateOf(false) }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    // Llamada a la API cuando se carga la pantalla
+    LaunchedEffect(Unit) {
+        isLoading = true
+        try {
+            val consejo = ApiClient.apiService.getConsejo(idUsuario)
+            consejoNombre = consejo.titulo
+            consejoContenido = consejo.contenido
+        } catch (e: Exception) {
+            error = e.message ?: "Error al cargar el consejo"
+            Log.e("PantallaHome", "Error al obtener consejo: $error")
+        } finally {
+            isLoading = false
+        }
+    }
 
     BaseScreen(
         selectedTab = selectedTab,
@@ -36,7 +60,8 @@ fun PantallaHome(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-            ) {// Barra de búsqueda
+            ) {
+                // Barra de búsqueda
                 TextField(
                     value = searchText,
                     onValueChange = { searchText = it },
@@ -61,36 +86,48 @@ fun PantallaHome(
                         unfocusedIndicatorColor = Color.Transparent,
                         disabledIndicatorColor = Color.Transparent
                     ),
-                    shape = RoundedCornerShape(28.dp), // Bordes muy redondeados
+                    shape = RoundedCornerShape(28.dp),
                     singleLine = true
                 )
-                // Rectángulo superior (Título)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(GrayBlue)
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = "Título Consejo",
-                        style = MaterialTheme.typography.titleLarge,
-                        color = Color.White // Color del texto
-                    )
-                }
 
-                // Rectángulo inferior (Descripción)
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(LightPurple)
-                        .padding(16.dp)
-                ) {
+                if (isLoading) {
+                    CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                } else if (error != null) {
                     Text(
-                        text = "Descripción Consejo",
-                        style = MaterialTheme.typography.bodyLarge
+                        text = error!!,
+                        color = Color.Red,
+                        modifier = Modifier.padding(16.dp)
                     )
+                } else {
+                    // Rectángulo superior (Título)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(GrayBlue)
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = consejoNombre,
+                            style = MaterialTheme.typography.titleLarge,
+                            color = Color.White
+                        )
+                    }
+
+                    // Rectángulo inferior (Descripción)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(LightPurple)
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = consejoContenido,
+                            style = MaterialTheme.typography.bodyLarge
+                        )
+                    }
                 }
             }
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -126,7 +163,8 @@ fun PantallaHomePreview() {
     BienestarTheme {
         PantallaHome(
             onLogout = {},
-            userName = "Usuario Ejemplo"
+            userName = "Usuario Ejemplo",
+            idUsuario = "UHbnffsmeDQHuGOY4dig8sW9yRy1"
         )
     }
 }

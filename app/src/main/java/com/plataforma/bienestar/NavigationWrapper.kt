@@ -2,11 +2,12 @@ package com.plataforma.bienestar
 
 import android.util.Log
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.google.firebase.auth.FirebaseAuth
-import com.plataforma.bienestar.acceso.registro.PantallaRegistro
+import com.plataforma.bienestar.acceso.registro.registro.PantallaRegistro
 import com.plataforma.bienestar.acceso.registro.auth.GoogleAuthManager
 import com.plataforma.bienestar.home.PantallaHome
 import com.plataforma.bienestar.acceso.registro.inicio.PantallaInicio
@@ -56,6 +57,17 @@ fun NavigationWrapper(
 
         composable("home") {
             val currentUser = auth.currentUser
+
+            // Verificamos que el usuario esté autenticado, si no, redirigimos
+            if (currentUser == null) {
+                LaunchedEffect(Unit) {
+                    navHostController.navigate("inicio") {
+                        popUpTo("home") { inclusive = true }
+                    }
+                }
+                return@composable
+            }
+
             PantallaHome(
                 onLogout = {
                     googleAuthManager.signOut {
@@ -64,7 +76,8 @@ fun NavigationWrapper(
                         }
                     }
                 },
-                userName = currentUser?.displayName
+                userName = currentUser.displayName,
+                idUsuario = currentUser.uid
             )
         }
     }
