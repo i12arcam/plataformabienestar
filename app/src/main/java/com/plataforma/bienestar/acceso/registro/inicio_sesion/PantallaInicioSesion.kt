@@ -33,9 +33,7 @@ import androidx.navigation.NavHostController
 import com.google.firebase.auth.FirebaseAuth
 import com.plataforma.bienestar.R
 import com.plataforma.bienestar.ui.theme.BackgroundGreen
-import com.plataforma.bienestar.ui.theme.Black
 import com.plataforma.bienestar.ui.theme.DarkGreen
-import com.plataforma.bienestar.ui.theme.Gray
 import com.plataforma.bienestar.ui.theme.MainGreen
 
 @Composable
@@ -44,7 +42,6 @@ fun PantallaInicioSesion(
     navController: NavHostController
 )
 {
-    var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
@@ -56,7 +53,7 @@ fun PantallaInicioSesion(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Row(){
+        Row{
             Icon(
                 painter = painterResource(id = R.drawable.baseline_arrow_back_24),
                 contentDescription = "",
@@ -68,17 +65,6 @@ fun PantallaInicioSesion(
             )
             Spacer(modifier = Modifier.weight(1f))
         }
-        Text("Nombre", color = White, fontWeight = FontWeight.Bold, fontSize = 40.sp)
-        TextField(
-            value = name,
-            onValueChange = { name = it },
-            modifier = Modifier.fillMaxWidth(),
-            colors = TextFieldDefaults.colors(
-                unfocusedContainerColor = White,
-                focusedContainerColor = BackgroundGreen
-            )
-        )
-        Spacer(Modifier.height(48.dp))
         Text("Correo", color = White, fontWeight = FontWeight.Bold, fontSize = 40.sp)
         TextField(
             value = email,
@@ -107,7 +93,7 @@ fun PantallaInicioSesion(
             onClick = {
             auth.signInWithEmailAndPassword(email, password).addOnCompleteListener{ task ->
                 if(task.isSuccessful){
-                    navController.navigate("home") {
+                    navController.navigate("app") {
                         popUpTo("inicio_sesion") { inclusive = true }
                     }
                     Log.i("aris", "LOGIN OK")

@@ -1,4 +1,4 @@
-package com.plataforma.bienestar.home
+package com.plataforma.bienestar.app
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box

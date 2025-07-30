@@ -134,7 +134,7 @@ fun PantallaRegistro(auth: FirebaseAuth, navController: NavHostController) {
                                                     )
                                                 )
                                                 withContext(Dispatchers.Main) {
-                                                    navController.navigate("home") {
+                                                    navController.navigate("app") {
                                                         popUpTo("registro") { inclusive = true }
                                                     }
                                                 }

@@ -9,9 +9,9 @@ import androidx.navigation.compose.composable
 import com.google.firebase.auth.FirebaseAuth
 import com.plataforma.bienestar.acceso.registro.registro.PantallaRegistro
 import com.plataforma.bienestar.acceso.registro.auth.GoogleAuthManager
-import com.plataforma.bienestar.home.PantallaHome
 import com.plataforma.bienestar.acceso.registro.inicio.PantallaInicio
 import com.plataforma.bienestar.acceso.registro.inicio_sesion.PantallaInicioSesion
+import com.plataforma.bienestar.app.PantallaApp
 
 @Composable
 fun NavigationWrapper(
@@ -29,7 +29,7 @@ fun NavigationWrapper(
                     googleAuthManager.launchSignIn(
                         onSuccess = { user ->
                             Log.i("GoogleSignIn", "Inicio de sesión exitoso: ${user.displayName}")
-                            navHostController.navigate("home") {
+                            navHostController.navigate("app") {
                                 popUpTo("inicio") { inclusive = true }
                             }
                         },
@@ -55,24 +55,25 @@ fun NavigationWrapper(
             )
         }
 
-        composable("home") {
+        composable("app") {
             val currentUser = auth.currentUser
 
             // Verificamos que el usuario esté autenticado, si no, redirigimos
             if (currentUser == null) {
                 LaunchedEffect(Unit) {
                     navHostController.navigate("inicio") {
-                        popUpTo("home") { inclusive = true }
+                        popUpTo("app") { inclusive = true }
                     }
                 }
                 return@composable
             }
 
-            PantallaHome(
+            PantallaApp(
                 onLogout = {
+                    auth.signOut()
                     googleAuthManager.signOut {
                         navHostController.navigate("inicio") {
-                            popUpTo("home") { inclusive = true }
+                            popUpTo("app") { inclusive = true }
                         }
                     }
                 },

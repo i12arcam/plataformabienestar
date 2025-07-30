@@ -42,7 +42,7 @@ class MainActivity : ComponentActivity() {
                             navHostController = controller,
                             auth = auth,
                             googleAuthManager = googleAuthManager,
-                            startDestination = if (auth.currentUser != null) "home" else "inicio"
+                            startDestination = if (auth.currentUser != null) "app" else "inicio"
                         )
                     }
                 }
@@ -56,7 +56,7 @@ class MainActivity : ComponentActivity() {
             navHostController?.let { controller ->
                 auth.currentUser?.let { user ->
                     Log.i("MainActivity", "Usuario ya logueado: ${user.email}")
-                    controller.navigate("home") {
+                    controller.navigate("app") {
                         popUpTo(0) // Limpia toda la pila
                     }
                     alreadyHandledNavigation = true

@@ -1,6 +1,7 @@
 package com.plataforma.bienestar.data.api
 
 import com.plataforma.bienestar.data.api.model.Consejo
+import com.plataforma.bienestar.data.api.model.Emocion
 import com.plataforma.bienestar.data.api.model.Usuario
 import com.plataforma.bienestar.data.api.model.UsuarioResponse
 import retrofit2.http.Body
@@ -13,7 +14,9 @@ interface ApiService {
     suspend fun createUser(@Body user: Usuario): UsuarioResponse
 
     @GET("api/consejo/select")
-    suspend fun getConsejo(@Query("id_usuario") idUsuario: String): Consejo
+    suspend fun getConsejo(@Query("idUsuario") idUsuario: String): Consejo
 
-    // Puedes añadir más endpoints aquí
+    @POST("api/emocion")
+    suspend fun createEmocion(@Body emocion: Emocion): UsuarioResponse
+
 }
