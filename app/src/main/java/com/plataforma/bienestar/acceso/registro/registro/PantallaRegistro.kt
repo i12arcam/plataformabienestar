@@ -114,7 +114,7 @@ fun PantallaRegistro(auth: FirebaseAuth, navController: NavHostController) {
 
                             // Actualizar el perfil del usuario con el nombre
                             val profileUpdates = UserProfileChangeRequest.Builder()
-                                .setDisplayName(name)  // Aquí asignas el nombre
+                                .setDisplayName(name)
                                 .build()
 
                             firebaseUser?.updateProfile(profileUpdates)
@@ -122,7 +122,7 @@ fun PantallaRegistro(auth: FirebaseAuth, navController: NavHostController) {
                                     if (updateTask.isSuccessful) {
                                         Log.d("Registro", "Nombre actualizado en Firebase Auth")
 
-                                        // Ahora puedes proceder con el registro en tu backend
+                                        // Registro Backend
                                         val userId = firebaseUser.uid
                                         CoroutineScope(Dispatchers.IO).launch {
                                             try {

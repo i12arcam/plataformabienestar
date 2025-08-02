@@ -3,6 +3,8 @@ plugins {
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.googleServices)
     alias(libs.plugins.crashlytics)
+
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -86,4 +88,14 @@ dependencies {
     implementation(libs.coroutines.android)
     // Gson
     implementation(libs.gson)
+    // Serialización
+    implementation(libs.kotlinx.serialization.json)
+
+    // Retrofit con convertidor
+    implementation(libs.retrofit2.kotlinx.serialization.converter)
+
+    // Reproductor youtube
+    implementation(libs.android.youtube.player)
+
+
 }

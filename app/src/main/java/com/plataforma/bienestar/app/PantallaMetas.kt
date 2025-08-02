@@ -105,8 +105,7 @@ fun PantallaMetas(
 @Composable
 fun PantallaMetasPreview() {
     BienestarTheme {
-        PantallaHome(
-            onLogout = {},
+        PantallaMetas(
             userName = "Usuario Ejemplo",
             idUsuario = "UHbnffsmeDQHuGOY4dig8sW9yRy1"
         )

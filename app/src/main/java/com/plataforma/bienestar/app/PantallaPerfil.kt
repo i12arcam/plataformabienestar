@@ -22,6 +22,7 @@ import com.plataforma.bienestar.ui.theme.LightPurple
 
 @Composable
 fun PantallaPerfil(
+    onLogout: () -> Unit,
     userName: String? = null,
     idUsuario: String,
     tabViewModel: TabViewModel = viewModel()
@@ -97,6 +98,21 @@ fun PantallaPerfil(
                     }
                 }
             }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+                    .padding(16.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Button(
+                    onClick = onLogout,
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    Text("Cerrar sesión")
+                }
+            }
         }
     )
 }
@@ -105,7 +121,7 @@ fun PantallaPerfil(
 @Composable
 fun PantallaPerfilPreview() {
     BienestarTheme {
-        PantallaHome(
+        PantallaPerfil(
             onLogout = {},
             userName = "Usuario Ejemplo",
             idUsuario = "UHbnffsmeDQHuGOY4dig8sW9yRy1"

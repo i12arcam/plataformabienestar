@@ -4,14 +4,18 @@ import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.google.firebase.auth.FirebaseAuth
 import com.plataforma.bienestar.acceso.registro.registro.PantallaRegistro
 import com.plataforma.bienestar.acceso.registro.auth.GoogleAuthManager
 import com.plataforma.bienestar.acceso.registro.inicio.PantallaInicio
 import com.plataforma.bienestar.acceso.registro.inicio_sesion.PantallaInicioSesion
 import com.plataforma.bienestar.app.PantallaApp
+import com.plataforma.bienestar.app.home.PantallaBusqueda
+import com.plataforma.bienestar.app.home.detalles_recursos.PantallaRecurso
 
 @Composable
 fun NavigationWrapper(
@@ -35,12 +39,12 @@ fun NavigationWrapper(
                         },
                         onFailure = { error: String ->
                             Log.e("GoogleSignIn", error)
-                            // Puedes mostrar un mensaje de error al usuario aquí
                         }
                     )
                 }
             )
         }
+
         composable("inicio_sesion") {
             PantallaInicioSesion(
                 auth = auth,
@@ -58,7 +62,6 @@ fun NavigationWrapper(
         composable("app") {
             val currentUser = auth.currentUser
 
-            // Verificamos que el usuario esté autenticado, si no, redirigimos
             if (currentUser == null) {
                 LaunchedEffect(Unit) {
                     navHostController.navigate("inicio") {
@@ -78,7 +81,38 @@ fun NavigationWrapper(
                     }
                 },
                 userName = currentUser.displayName,
-                idUsuario = currentUser.uid
+                idUsuario = currentUser.uid,
+                navController = navHostController
+            )
+        }
+
+        composable(
+            route = "busqueda_recursos/{parametro}",
+            arguments = listOf(
+                navArgument("parametro") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val parametro = backStackEntry.arguments?.getString("parametro") ?: ""
+            PantallaBusqueda(
+                parametro = parametro,
+                navController = navHostController
+            )
+        }
+
+        composable(
+            route = "recurso_detalle/{recursoId}",
+            arguments = listOf(
+                navArgument("recursoId") {
+                    type = NavType.StringType
+                }
+            )
+        ) { backStackEntry ->
+            val recursoId = backStackEntry.arguments?.getString("recursoId") ?: ""
+            PantallaRecurso(
+                recursoId = recursoId,
+                navController = navHostController
             )
         }
     }

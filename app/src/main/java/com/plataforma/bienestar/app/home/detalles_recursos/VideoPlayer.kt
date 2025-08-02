@@ -1,0 +1,59 @@
+package com.plataforma.bienestar.app.home.detalles_recursos
+
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.viewinterop.AndroidView
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.PlayerConstants
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.listeners.AbstractYouTubePlayerListener
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTubePlayerView
+
+@Composable
+fun VideoPlayer(
+    modifier: Modifier = Modifier,
+    onPlayerReady: (YouTubePlayer) -> Unit = {},
+    onVideoEnded: () -> Unit = {}
+) {
+
+    AndroidView(
+        factory = { ctx ->
+            YouTubePlayerView(ctx).apply {
+                enableAutomaticInitialization = false
+                initialize(
+                    object : AbstractYouTubePlayerListener() {
+                        override fun onReady(player: YouTubePlayer) {
+                            onPlayerReady(player) // Notifica cuando el player está listo
+                        }
+
+                        override fun onStateChange(
+                            player: YouTubePlayer,
+                            state: PlayerConstants.PlayerState
+                        ) {
+                            if (state == PlayerConstants.PlayerState.ENDED) {
+                                onVideoEnded()
+                            }
+                        }
+                    },
+                    true
+                )
+            }
+        },
+        modifier = modifier
+    )
+}
+
+fun extractYouTubeId(url: String): String {
+    val patterns = listOf(
+        "(?<=youtu.be/|watch\\?v=|/videos/|embed\\/)[^#\\&\\?]*",
+        "(?<=v=)[^#\\&\\?]*",
+        "(?<=be/)[^#\\&\\?]*"
+    )
+
+    patterns.forEach { pattern ->
+        val compiled = java.util.regex.Pattern.compile(pattern)
+        val matcher = compiled.matcher(url)
+        if (matcher.find()) return matcher.group()
+    }
+
+    return url
+}

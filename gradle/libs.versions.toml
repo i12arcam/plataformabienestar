@@ -21,6 +21,11 @@ retrofit = "2.9.0"
 coroutines = "1.6.4"
 gson = "2.9.0"
 
+kotlinx-serialization = "1.6.3"
+retrofit-serialization-converter = "1.0.0"
+
+youtubePlayer = "12.1.0"
+
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -52,9 +57,18 @@ retrofit-gson-converter = { module = "com.squareup.retrofit2:converter-gson", ve
 coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "coroutines" }
 gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
 
+# Serialización
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+
+# Retrofit con convertidor
+retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter", version.ref = "retrofit-serialization-converter" }
+
+android-youtube-player = { group = "com.pierfrancescosoffritti.androidyoutubeplayer", name = "core", version.ref = "youtubePlayer" }
+
 [plugins]
 googleServices = { id = "com.google.gms.google-services", version.ref = "services"}
 crashlytics = {id= "com.google.firebase.crashlytics", version.ref = "crashlytics"}
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 

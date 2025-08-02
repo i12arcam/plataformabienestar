@@ -105,8 +105,7 @@ fun PantallaProgramas(
 @Composable
 fun PantallaEmocionPreview() {
     BienestarTheme {
-        PantallaHome(
-            onLogout = {},
+        PantallaProgramas(
             userName = "Usuario Ejemplo",
             idUsuario = "UHbnffsmeDQHuGOY4dig8sW9yRy1"
         )
