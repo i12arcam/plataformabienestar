@@ -12,14 +12,14 @@ fun PantallaApp (
     userName: String?,
     idUsuario: String,
     navController: NavHostController
-    ) {
-        val tabViewModel: TabViewModel = viewModel()
+) {
+    val tabViewModel: TabViewModel = viewModel()
 
-        when (tabViewModel.selectedTab.value) {
-            "home" -> PantallaHome(idUsuario,navController)
-            "programas" -> PantallaProgramas(userName, idUsuario)
-            "emociones" -> PantallaEmociones(userName, idUsuario)
-            "metas" -> PantallaMetas(userName, idUsuario)
-            "perfil" -> PantallaPerfil(onLogout, userName, idUsuario)
-        }
+    when (tabViewModel.selectedTab.value) {
+        "home" -> PantallaHome(idUsuario,navController)
+        "programas" -> PantallaProgramas(userName, idUsuario)
+        "emociones" -> PantallaEmociones(userName, idUsuario)
+        "metas" -> PantallaMetas(userName, idUsuario)
+        "perfil" -> PantallaPerfil(onLogout, userName, idUsuario)
     }
+}

@@ -1,6 +1,7 @@
 package com.plataforma.bienestar.app.home
 
 import android.util.Log
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,10 +14,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
+import com.plataforma.bienestar.R
 import com.plataforma.bienestar.app.BaseScreen
 import com.plataforma.bienestar.app.TabViewModel
 import com.plataforma.bienestar.data.api.ApiClient
@@ -39,11 +42,13 @@ fun PantallaBusqueda(
     var searchText by remember { mutableStateOf(parametro) }
 
 
-    // Cargar el recurso cuando se abre la pantalla o cambia el ID o el filtro
+    // Cargar el recurso cuando se abre la pantalla, o cambia el parametro o el filtro
     LaunchedEffect(parametro, filtro) {
         isLoading = true
         try {
+            Log.d("Pepino","Peppinisimo")
             coincidencias = ApiClient.apiService.getRecursosBusqueda(parametro, filtro)
+            Log.d("Pepino", coincidencias.toString())
         } catch (e: Exception) {
             error = "Error al cargar el recurso: ${e.message}"
         } finally {
@@ -61,6 +66,25 @@ fun PantallaBusqueda(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
+                Row {
+                    Icon(
+                        painter = painterResource(id = R.drawable.baseline_arrow_back_24),
+                        contentDescription = "",
+                        tint = DarkGreen,
+                        modifier = Modifier
+                            .clickable { navController.popBackStack() }
+                            .padding(vertical = 20.dp, horizontal = 5.dp)
+                            .size(24.dp)
+                    )
+                    // Resultados Busqueda Titulo
+                    Text(
+                        text = "Resultados de la búsqueda de $parametro",
+                        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
+                        style = MaterialTheme.typography.titleLarge,
+                        color = Color.DarkGray,
+                    )
+                }
+
                 TextField(
                     value = searchText,
                     onValueChange = { searchText = it },
@@ -119,8 +143,8 @@ fun PantallaBusqueda(
                     )
                     FilterButton(
                         text = "Etiqueta",
-                        isSelected = filtro == "etiqueta",
-                        onClick = { filtro = "etiqueta" },
+                        isSelected = filtro == "etiquetas",
+                        onClick = { filtro = "etiquetas" },
                         modifier = Modifier.weight(1f)
                     )
                     FilterButton(

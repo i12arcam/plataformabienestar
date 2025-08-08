@@ -102,16 +102,18 @@ fun NavigationWrapper(
         }
 
         composable(
-            route = "recurso_detalle/{recursoId}",
+            route = "recurso_detalle/{recursoId}/{usuarioId}",
             arguments = listOf(
-                navArgument("recursoId") {
-                    type = NavType.StringType
-                }
+                navArgument("recursoId") { type = NavType.StringType },
+                navArgument("usuarioId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
             val recursoId = backStackEntry.arguments?.getString("recursoId") ?: ""
+            val usuarioId = backStackEntry.arguments?.getString("usuarioId") ?: ""
+
             PantallaRecurso(
                 recursoId = recursoId,
+                usuarioId = usuarioId,
                 navController = navHostController
             )
         }

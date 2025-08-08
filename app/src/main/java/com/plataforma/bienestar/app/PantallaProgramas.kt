@@ -12,9 +12,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.plataforma.bienestar.app.BaseScreen
-import com.plataforma.bienestar.app.TabViewModel
-import com.plataforma.bienestar.app.home.PantallaHome
 import com.plataforma.bienestar.data.api.ApiClient
 import com.plataforma.bienestar.ui.theme.BienestarTheme
 import com.plataforma.bienestar.ui.theme.GrayBlue

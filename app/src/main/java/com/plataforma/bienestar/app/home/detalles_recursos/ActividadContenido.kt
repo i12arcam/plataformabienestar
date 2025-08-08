@@ -7,7 +7,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
+import com.plataforma.bienestar.data.api.ApiClient.apiService
 import com.plataforma.bienestar.data.api.model.Recurso
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 enum class EstadoActividad {
     NO_INICIADA,
@@ -17,10 +20,11 @@ enum class EstadoActividad {
 
 @Composable
 fun ActividadContenido(
+    usuarioId: String,
     recurso: Recurso,
     navController: NavController,
     modifier: Modifier = Modifier,
-    onEstadoCambiado: (EstadoActividad) -> Unit = {}
+    coroutineScope: CoroutineScope = rememberCoroutineScope(),
 ) {
     var estadoActividad by remember { mutableStateOf(EstadoActividad.NO_INICIADA) }
     val playerState = remember { mutableStateOf<YouTubePlayer?>(null) }
@@ -56,7 +60,12 @@ fun ActividadContenido(
                 },
                 onVideoEnded = {
                     estadoActividad = EstadoActividad.TERMINADA
-                    onEstadoCambiado(EstadoActividad.TERMINADA)
+                    actualizarEstadoActividad(
+                        coroutineScope = coroutineScope,
+                        usuarioId = usuarioId,
+                        recursoId = recurso.id,
+                        estado = estadoActividad
+                    )
                 }
             )
         }
@@ -69,7 +78,12 @@ fun ActividadContenido(
                     onClick = {
                         playerRef?.loadVideo(videoId, 0f)
                         estadoActividad = EstadoActividad.EN_PROGRESO
-                        onEstadoCambiado(EstadoActividad.EN_PROGRESO)
+                        actualizarEstadoActividad(
+                            coroutineScope = coroutineScope,
+                            usuarioId = usuarioId,
+                            recursoId = recurso.id,
+                            estado = estadoActividad
+                        )
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
@@ -108,6 +122,35 @@ fun ActividadContenido(
                     Text("Terminar Actividad")
                 }
             }
+        }
+    }
+}
+
+fun actualizarEstadoActividad(
+    coroutineScope: CoroutineScope,
+    usuarioId: String,
+    recursoId: String,
+    estado: EstadoActividad,
+    onSuccess: () -> Unit = {},
+    onError: (Throwable) -> Unit = {}
+) {
+    coroutineScope.launch {
+        try {
+            when (estado) {
+                EstadoActividad.EN_PROGRESO -> {
+                    apiService.iniciarActividad(usuarioId, recursoId)
+                }
+                EstadoActividad.TERMINADA -> {
+                    apiService.completarActividad(usuarioId, recursoId)
+                }
+                else -> {
+                    // No se requiere acción para NO_INICIADA
+                    return@launch
+                }
+            }
+            onSuccess()
+        } catch (e: Exception) {
+            onError(e)
         }
     }
 }

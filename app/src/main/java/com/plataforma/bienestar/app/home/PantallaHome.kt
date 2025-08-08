@@ -5,9 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 
@@ -106,8 +108,11 @@ fun PantallaHome(
                     ),
                     keyboardActions = KeyboardActions(
                         onSearch = {
-                            Log.d("Navigation", "Navegando con : ${searchText}")
-                            navController.navigate("busqueda_recursos/$searchText")
+                            Log.d("Navigation", "Navegando con : $searchText")
+                            if(searchText != ""){
+                                navController.navigate("busqueda_recursos/$searchText")
+                            }
+
                         }
                     )
                 )
@@ -139,8 +144,10 @@ fun PantallaHome(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .heightIn(max = 160.dp) // Altura máxima antes de hacer scroll
                             .background(LightPurple)
                             .padding(16.dp)
+                            .verticalScroll(rememberScrollState()) // Habilita el scroll vertical
                     ) {
                         Text(
                             text = consejoContenido,
@@ -159,7 +166,7 @@ fun PantallaHome(
                                 recurso = recurso,
                                 onClick = {
                                     Log.d("Navigation", "Navegando con : ${recurso}")
-                                    navController.navigate("recurso_detalle/${recurso.id}")
+                                    navController.navigate("recurso_detalle/${recurso.id}/${idUsuario}")
                                 }
                             )
                             Spacer(modifier = Modifier.height(8.dp))

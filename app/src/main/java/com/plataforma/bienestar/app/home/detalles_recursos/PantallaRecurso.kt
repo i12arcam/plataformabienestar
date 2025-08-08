@@ -25,6 +25,7 @@ import com.plataforma.bienestar.ui.theme.LightPurple
 
 @Composable
 fun PantallaRecurso(
+    usuarioId: String,
     recursoId: String,
     navController: NavController,
     tabViewModel: TabViewModel = viewModel()
@@ -58,19 +59,6 @@ fun PantallaRecurso(
                     .fillMaxWidth()
                     .verticalScroll(rememberScrollState())
             ) {
-                Row {
-                    Icon(
-                        painter = painterResource(id = R.drawable.baseline_arrow_back_24),
-                        contentDescription = "",
-                        tint = DarkGreen,
-                        modifier = Modifier
-                            .clickable { navController.popBackStack() }
-                            .padding(vertical = 24.dp)
-                            .size(24.dp)
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                }
-
                 if (isLoading) {
                     CircularProgressIndicator(modifier = Modifier
                         .align(Alignment.CenterHorizontally)
@@ -88,22 +76,34 @@ fun PantallaRecurso(
                             .fillMaxWidth()
                             .background(GrayBlue)
                     ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = recurso?.titulo ?: "",
-                                style = MaterialTheme.typography.titleLarge,
-                                color = Color.White
+                        Row {
+                            Icon(
+                                painter = painterResource(id = R.drawable.baseline_arrow_back_24),
+                                contentDescription = "",
+                                tint = DarkGreen,
+                                modifier = Modifier
+                                    .clickable { navController.popBackStack() }
+                                    .padding(vertical = 20.dp, horizontal = 5.dp)
+                                    .size(24.dp)
                             )
-
-                            recurso?.autor?.let { autor ->
+                            Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
-                                    text = "Por $autor",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = Color.White.copy(alpha = 0.8f),
-                                    modifier = Modifier.padding(top = 4.dp)
+                                    text = recurso?.titulo ?: "",
+                                    style = MaterialTheme.typography.titleLarge,
+                                    color = Color.White
                                 )
+
+                                recurso?.autor?.let { autor ->
+                                    Text(
+                                        text = "Por $autor",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = Color.White.copy(alpha = 0.8f),
+                                        modifier = Modifier.padding(top = 4.dp)
+                                    )
+                                }
                             }
                         }
+
                     }
 
                     // Contenido del recurso
@@ -116,7 +116,7 @@ fun PantallaRecurso(
                         when (recurso?.tipo) {
                             "articulo" -> ArticuloContenido(recurso!!)
                             "video" -> VideoContenido(recurso!!)
-                            "actividad" -> ActividadContenido(recurso!!, navController)
+                            "actividad" -> ActividadContenido(usuarioId, recurso!!, navController)
                         }
                     }
                 }
@@ -124,4 +124,3 @@ fun PantallaRecurso(
         }
     )
 }
-
