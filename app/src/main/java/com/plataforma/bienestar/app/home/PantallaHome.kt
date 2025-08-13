@@ -49,6 +49,8 @@ fun PantallaHome(
     // Estado para los recursos
     var recursos by remember { mutableStateOf<List<Recurso>>(emptyList()) }
 
+    Log.d("IDUsuario", "IDUsuario: $idUsuario")
+
     // Llamada a la API cuando se carga la pantalla
     LaunchedEffect(Unit) {
         isLoading = true
@@ -58,7 +60,8 @@ fun PantallaHome(
             consejoContenido = consejo.contenido
 
             // Llamada para obtener recursos
-            recursos = ApiClient.apiService.getRecursos()
+            recursos = ApiClient.apiService.getRecursosSeleccionados(idUsuario)
+            Log.d("Recursos", "Recursos: $recursos")
         } catch (e: Exception) {
             error = e.message ?: "Error al cargar los datos"
             Log.e("PantallaHome", "Error: $error")
@@ -165,7 +168,7 @@ fun PantallaHome(
                             RecursoItem(
                                 recurso = recurso,
                                 onClick = {
-                                    Log.d("Navigation", "Navegando con : ${recurso}")
+                                    Log.d("Navigation", "Navegando con : $recurso y $idUsuario")
                                     navController.navigate("recurso_detalle/${recurso.id}/${idUsuario}")
                                 }
                             )

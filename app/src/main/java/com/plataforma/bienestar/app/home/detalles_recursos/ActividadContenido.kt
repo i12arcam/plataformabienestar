@@ -31,7 +31,7 @@ fun ActividadContenido(
     var playerRef by playerState
 
     val videoId = remember(recurso.enlace_contenido) {
-        extractYouTubeId(recurso.enlace_contenido ?: "")
+        extractYouTubeId(recurso.enlace_contenido)
     }
 
     DisposableEffect(Unit) {
@@ -49,26 +49,24 @@ fun ActividadContenido(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        recurso.enlace_contenido?.let { videoUrl ->
-            VideoPlayer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f),
-                onPlayerReady = { player ->
-                    playerRef = player
-                    player.cueVideo(videoId, 0f)
-                },
-                onVideoEnded = {
-                    estadoActividad = EstadoActividad.TERMINADA
-                    actualizarEstadoActividad(
-                        coroutineScope = coroutineScope,
-                        usuarioId = usuarioId,
-                        recursoId = recurso.id,
-                        estado = estadoActividad
-                    )
-                }
-            )
-        }
+        VideoPlayer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(16f / 9f),
+            onPlayerReady = { player ->
+                playerRef = player
+                player.cueVideo(videoId, 0f)
+            },
+            onVideoEnded = {
+                estadoActividad = EstadoActividad.TERMINADA
+                actualizarEstadoActividad(
+                    coroutineScope = coroutineScope,
+                    usuarioId = usuarioId,
+                    recursoId = recurso.id,
+                    estado = estadoActividad
+                )
+            }
+        )
 
         Spacer(modifier = Modifier.height(24.dp))
 

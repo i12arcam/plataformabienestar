@@ -83,7 +83,8 @@ fun BaseScreen(
         // --- 3. BOTTOM BAR ---
         bottomBar = {
             NavigationBar(
-                containerColor = MainGreen
+                containerColor = MainGreen,
+                modifier = Modifier.height(56.dp)
             ) {
                 NavigationBarItem(
                     selected = selectedTab == "home",
@@ -95,8 +96,7 @@ fun BaseScreen(
                             modifier = Modifier.size(24.dp),
                             tint = if (selectedTab == "home") DarkGreen else Color.White
                         )
-                    },
-                    label = { Text("Inicio", color = Color.White) }
+                    }
                 )
                 NavigationBarItem(
                     selected = selectedTab == "programas",
@@ -108,8 +108,7 @@ fun BaseScreen(
                             modifier = Modifier.size(24.dp),
                             tint = if (selectedTab == "programas") DarkGreen else Color.White
                         )
-                    },
-                    label = { Text("Programas", color = Color.White) }
+                    }
                 )
                 NavigationBarItem(
                     selected = selectedTab == "emociones",
@@ -121,8 +120,7 @@ fun BaseScreen(
                             modifier = Modifier.size(24.dp),
                             tint = if (selectedTab == "emociones") DarkGreen else Color.White
                         )
-                    },
-                    label = { Text("Emociones", color = Color.White) }
+                    }
                 )
                 NavigationBarItem(
                     selected = selectedTab == "metas",
@@ -134,8 +132,7 @@ fun BaseScreen(
                             modifier = Modifier.size(24.dp),
                             tint = if (selectedTab == "metas") DarkGreen else Color.White
                         )
-                    },
-                    label = { Text("Metas", color = Color.White) }
+                    }
                 )
                 NavigationBarItem(
                     selected = selectedTab == "perfil",
@@ -147,8 +144,7 @@ fun BaseScreen(
                             modifier = Modifier.size(24.dp),
                             tint = if (selectedTab == "perfil") DarkGreen else Color.White
                         )
-                    },
-                    label = { Text("Perfil", color = Color.White) }
+                    }
                 )
             }
         }

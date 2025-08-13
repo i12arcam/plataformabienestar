@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
@@ -37,6 +39,11 @@ fun PantallaBusqueda(
     var coincidencias by remember { mutableStateOf<List<Recurso>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    var showError by remember { mutableStateOf(false) }
+
+    val categorias = listOf("Afrontamiento Emocional", "Autoconocimiento", "Autoaceptacion",
+        "Desarrollo Personal", "Habilidades Sociales", "Manejo del Estres", "Meditacion",
+        "Mindfulness", "Relaciones Saludables", "Respiracion", "Sueño", "Yoga")
 
     var filtro by remember { mutableStateOf("titulo") }
     var searchText by remember { mutableStateOf(parametro) }
@@ -46,9 +53,8 @@ fun PantallaBusqueda(
     LaunchedEffect(parametro, filtro) {
         isLoading = true
         try {
-            Log.d("Pepino","Peppinisimo")
             coincidencias = ApiClient.apiService.getRecursosBusqueda(parametro, filtro)
-            Log.d("Pepino", coincidencias.toString())
+            Log.d("Recursos", coincidencias.toString())
         } catch (e: Exception) {
             error = "Error al cargar el recurso: ${e.message}"
         } finally {
@@ -78,7 +84,7 @@ fun PantallaBusqueda(
                     )
                     // Resultados Busqueda Titulo
                     Text(
-                        text = "Resultados de la búsqueda de $parametro",
+                        text = "Resultados búsqueda de $parametro",
                         modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.DarkGray,
@@ -112,7 +118,11 @@ fun PantallaBusqueda(
                     shape = RoundedCornerShape(28.dp),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Search
+                        imeAction = ImeAction.Search,
+                        // Asegurar que el teclado permita caracteres especiales
+                        keyboardType = KeyboardType.Text,
+                        autoCorrect = true,
+                        capitalization = KeyboardCapitalization.Sentences
                     ),
                     keyboardActions = KeyboardActions(
                         onSearch = {
@@ -121,6 +131,23 @@ fun PantallaBusqueda(
                         }
                     )
                 )
+                if(showError) {
+                    Log.d("Showerror","Mostrando error")
+                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                        Text(
+                            text = "Categoría no válida",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                        Text(
+                            text = "Opciones válidas: ${categorias.joinToString(", ")}",
+                            color = MaterialTheme.colorScheme.error,
+                            style = MaterialTheme.typography.bodySmall,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
+                    }
+                }
+
                 // Filtros
                 Text(
                     text = "Filtrar por",
@@ -138,19 +165,25 @@ fun PantallaBusqueda(
                     FilterButton(
                         text = "Título",
                         isSelected = filtro == "titulo",
-                        onClick = { filtro = "titulo" },
-                        modifier = Modifier.weight(1f)
-                    )
-                    FilterButton(
-                        text = "Etiqueta",
-                        isSelected = filtro == "etiquetas",
-                        onClick = { filtro = "etiquetas" },
+                        onClick = {
+                            showError = false
+                            filtro = "titulo" },
                         modifier = Modifier.weight(1f)
                     )
                     FilterButton(
                         text = "Categoría",
                         isSelected = filtro == "categoria",
-                        onClick = { filtro = "categoria" },
+                        onClick = {
+                            val normalizedParam = searchText.trim().lowercase()
+                            val isCategoryValid = categorias.any { it.trim().lowercase() == normalizedParam }
+                            if(isCategoryValid){
+                                Log.d("Showerror","False")
+                                filtro = "categoria"
+                                showError = false
+                            } else {
+                                Log.d("Showerror","True")
+                                showError = true
+                            }},
                         modifier = Modifier.weight(1f)
                     )
                 }

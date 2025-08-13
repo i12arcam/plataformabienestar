@@ -8,6 +8,7 @@ import com.plataforma.bienestar.data.api.model.Usuario
 import com.plataforma.bienestar.data.api.model.UsuarioActividad
 import com.plataforma.bienestar.data.api.model.UsuarioResponse
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PUT
@@ -22,10 +23,16 @@ interface ApiService {
     suspend fun getConsejo(@Query("idUsuario") idUsuario: String): Consejo
 
     @POST("api/emocion")
-    suspend fun createEmocion(@Body emocion: Emocion): UsuarioResponse
+    suspend fun createEmocion(@Body emocion: Emocion): Emocion
 
-    @GET("api/recurso/all")
-    suspend fun getRecursos(): List<Recurso>
+    @GET("api/emocion/all/{usuarioId}")
+    suspend fun getAllEmociones(@Path("usuarioId") usuarioId: String): List<Emocion>
+
+    @GET("api/emocion/recent/{usuarioId}")
+    suspend fun getEmocionesRecientes(@Path("usuarioId") usuarioId: String): List<Emocion>
+
+    @GET("api/recurso/select")
+    suspend fun getRecursosSeleccionados(@Query("idUsuario") idUsuario: String): List<Recurso>
 
     @GET("api/recurso/buscar/{parametro}/{filtro}")
     suspend fun getRecursosBusqueda(
@@ -36,7 +43,6 @@ interface ApiService {
     @GET("api/recurso/{idRecurso}")
     suspend fun getRecurso(@Path("idRecurso") idRecurso: String): Recurso
 
-    // Nuevas funciones para UsuarioActividad
     @GET("api/actividad/estado/{usuarioId}/{recursoId}")
     suspend fun getEstadoActividad(
         @Path("usuarioId") usuarioId: String,
@@ -61,8 +67,37 @@ interface ApiService {
         @Query("estado") estado: String? = null
     ): List<UsuarioActividad>
 
+    @GET("api/meta/activas/{usuarioId}")
+    suspend fun getMetasActivas(@Path("usuarioId") usuarioId: String): List<Meta>
+
+    @GET("api/meta/completadas/{usuarioId}")
+    suspend fun getMetasCompletadas(@Path("usuarioId") usuarioId: String): List<Meta>
+
+    @GET("api/meta/canceladas/{usuarioId}")
+    suspend fun getMetasCanceladas(@Path("usuarioId") usuarioId: String): List<Meta>
+
     @POST("api/meta")
     suspend fun createMeta(@Body meta: Meta): UsuarioResponse
+
+    @PUT("api/meta/progreso/{metaId}")
+    suspend fun incrementarDiasMeta(
+        @Path("metaId") recursoId: String
+    ): UsuarioActividad
+
+    @PUT("api/meta/cancelar/{metaId}")
+    suspend fun cancelarMeta(
+        @Path("metaId") recursoId: String
+    ): UsuarioActividad
+
+    @PUT("api/meta/reanudar/{metaId}")
+    suspend fun reanudarMeta(
+        @Path("metaId") recursoId: String
+    ): UsuarioActividad
+
+    @DELETE("api/meta/{metaId}")
+    suspend fun eliminarMeta(
+        @Path("metaId") recursoId: String
+    ): UsuarioActividad
 
 
 }

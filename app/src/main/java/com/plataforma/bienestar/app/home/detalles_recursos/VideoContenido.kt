@@ -2,9 +2,10 @@ package com.plataforma.bienestar.app.home.detalles_recursos
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.plataforma.bienestar.data.api.model.Recurso
 
 @Composable
@@ -12,6 +13,11 @@ fun VideoContenido(
     recurso: Recurso,
     modifier: Modifier = Modifier
 ) {
+    val videoId = remember(recurso.enlace_contenido) {
+        extractYouTubeId(recurso.enlace_contenido)
+    }
+    val playerState = remember { mutableStateOf<YouTubePlayer?>(null) }
+
     Column(modifier = modifier) {
         if (!recurso.descripcion.isNullOrBlank()) {
             Text(
@@ -21,12 +27,14 @@ fun VideoContenido(
             Spacer(modifier = Modifier.height(16.dp))
         }
 
-        recurso.enlace_contenido?.let { videoUrl ->
-            VideoPlayer(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(16f / 9f)
-            )
-        }
+        VideoPlayer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .aspectRatio(16f / 9f),
+            onPlayerReady = { player ->
+                playerState.value = player
+                player.cueVideo(videoId, 0f)
+            }
+        )
     }
 }

@@ -3,11 +3,16 @@ package com.plataforma.bienestar
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.google.firebase.auth.EmailAuthProvider
 import com.google.firebase.auth.FirebaseAuth
 import com.plataforma.bienestar.acceso.registro.registro.PantallaRegistro
 import com.plataforma.bienestar.acceso.registro.auth.GoogleAuthManager
@@ -16,6 +21,7 @@ import com.plataforma.bienestar.acceso.registro.inicio_sesion.PantallaInicioSesi
 import com.plataforma.bienestar.app.PantallaApp
 import com.plataforma.bienestar.app.home.PantallaBusqueda
 import com.plataforma.bienestar.app.home.detalles_recursos.PantallaRecurso
+import com.google.firebase.auth.UserProfileChangeRequest
 
 @Composable
 fun NavigationWrapper(
@@ -61,6 +67,7 @@ fun NavigationWrapper(
 
         composable("app") {
             val currentUser = auth.currentUser
+            var userName by remember { mutableStateOf(currentUser?.displayName ?: "") }
 
             if (currentUser == null) {
                 LaunchedEffect(Unit) {
@@ -69,6 +76,12 @@ fun NavigationWrapper(
                     }
                 }
                 return@composable
+            }
+
+            LaunchedEffect(currentUser.displayName) {
+                currentUser.displayName?.let { name ->
+                    userName = name
+                }
             }
 
             PantallaApp(
@@ -80,7 +93,44 @@ fun NavigationWrapper(
                         }
                     }
                 },
-                userName = currentUser.displayName,
+                onChangeName = { nuevoNombre ->
+                    currentUser.updateProfile(
+                        UserProfileChangeRequest.Builder()
+                            .setDisplayName(nuevoNombre)
+                            .build()
+                    ).addOnCompleteListener { task ->
+                        if (task.isSuccessful) {
+                            Log.d("ProfileUpdate", "Nombre actualizado correctamente")
+                            // No necesitamos actualizar userName aquí, el LaunchedEffect lo hará
+                        } else {
+                            Log.e("ProfileUpdate", "Error al actualizar nombre", task.exception)
+                        }
+                    }
+                },
+                onChangePassword = { antiguaContrasena, nuevaContrasena ->
+                    val credential = EmailAuthProvider.getCredential(currentUser.email ?: "", antiguaContrasena)
+                    currentUser.reauthenticate(credential)
+                        .addOnCompleteListener { reauthTask ->
+                            if (reauthTask.isSuccessful) {
+                                currentUser.updatePassword(nuevaContrasena)
+                                    .addOnCompleteListener { updateTask ->
+                                        if (updateTask.isSuccessful) {
+                                            Log.d("PasswordUpdate", "Contraseña actualizada correctamente")
+                                        } else {
+                                            Log.e("PasswordUpdate", "Error al actualizar contraseña", updateTask.exception)
+                                        }
+                                    }
+                            } else {
+                                Log.e("Reauthentication", "Error en reautenticación", reauthTask.exception)
+                            }
+                        }
+                },
+                metodoAutenticacion = when {
+                    currentUser.providerData.any { it.providerId == "google.com" } -> "Google"
+                    currentUser.providerData.any { it.providerId == "password" } -> "Correo"
+                    else -> "Desconocido"
+                },
+                userName = userName,
                 idUsuario = currentUser.uid,
                 navController = navHostController
             )
