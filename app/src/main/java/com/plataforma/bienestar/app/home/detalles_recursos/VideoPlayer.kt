@@ -11,26 +11,30 @@ import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.views.YouTube
 @Composable
 fun VideoPlayer(
     modifier: Modifier = Modifier,
+    videoId: String,
     onPlayerReady: (YouTubePlayer) -> Unit = {},
+    onVideoStarted: () -> Unit = {},
     onVideoEnded: () -> Unit = {}
 ) {
-
     AndroidView(
         factory = { ctx ->
             YouTubePlayerView(ctx).apply {
                 enableAutomaticInitialization = false
                 initialize(
                     object : AbstractYouTubePlayerListener() {
-                        override fun onReady(player: YouTubePlayer) {
-                            onPlayerReady(player) // Notifica cuando el player está listo
+                        override fun onReady(youTubePlayer: YouTubePlayer) {
+                            youTubePlayer.cueVideo(videoId, 0f)
+                            onPlayerReady(youTubePlayer)
                         }
 
                         override fun onStateChange(
-                            player: YouTubePlayer,
+                            youTubePlayer: YouTubePlayer,
                             state: PlayerConstants.PlayerState
                         ) {
-                            if (state == PlayerConstants.PlayerState.ENDED) {
-                                onVideoEnded()
+                            when (state) {
+                                PlayerConstants.PlayerState.PLAYING -> onVideoStarted()
+                                PlayerConstants.PlayerState.ENDED -> onVideoEnded()
+                                else -> {}
                             }
                         }
                     },

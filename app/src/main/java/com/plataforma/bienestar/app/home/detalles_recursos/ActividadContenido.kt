@@ -23,24 +23,19 @@ fun ActividadContenido(
     usuarioId: String,
     recurso: Recurso,
     navController: NavController,
-    modifier: Modifier = Modifier,
-    coroutineScope: CoroutineScope = rememberCoroutineScope(),
+    estaEnPrograma: Boolean,
+    cambiarEstadoActividadPrograma: (nuevoEstado: String) -> Unit,
+    coroutineScope: CoroutineScope = rememberCoroutineScope()
 ) {
     var estadoActividad by remember { mutableStateOf(EstadoActividad.NO_INICIADA) }
-    val playerState = remember { mutableStateOf<YouTubePlayer?>(null) }
-    var playerRef by playerState
+    val videoId = extractYouTubeId(recurso.enlace_contenido)
+    // Añadimos una referencia al YouTubePlayer
+    var youTubePlayer by remember { mutableStateOf<YouTubePlayer?>(null) }
 
-    val videoId = remember(recurso.enlace_contenido) {
-        extractYouTubeId(recurso.enlace_contenido)
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            playerRef = null
-        }
-    }
-
-    Column(modifier = modifier) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
         if (!recurso.descripcion.isNullOrBlank()) {
             Text(
                 text = recurso.descripcion,
@@ -53,9 +48,22 @@ fun ActividadContenido(
             modifier = Modifier
                 .fillMaxWidth()
                 .aspectRatio(16f / 9f),
+            videoId = videoId,
             onPlayerReady = { player ->
-                playerRef = player
-                player.cueVideo(videoId, 0f)
+                youTubePlayer = player
+            },
+            onVideoStarted = {
+                if (estadoActividad == EstadoActividad.NO_INICIADA) {
+                    estadoActividad = EstadoActividad.EN_PROGRESO
+                    actualizarEstadoActividad(
+                        coroutineScope = coroutineScope,
+                        usuarioId = usuarioId,
+                        recursoId = recurso.id,
+                        estado = estadoActividad,
+                        estaEnPrograma = estaEnPrograma,
+                        cambiarEstadoActividadPrograma
+                    )
+                }
             },
             onVideoEnded = {
                 estadoActividad = EstadoActividad.TERMINADA
@@ -63,7 +71,9 @@ fun ActividadContenido(
                     coroutineScope = coroutineScope,
                     usuarioId = usuarioId,
                     recursoId = recurso.id,
-                    estado = estadoActividad
+                    estado = estadoActividad,
+                    estaEnPrograma = estaEnPrograma,
+                    cambiarEstadoActividadPrograma
                 )
             }
         )
@@ -74,14 +84,17 @@ fun ActividadContenido(
             EstadoActividad.NO_INICIADA -> {
                 Button(
                     onClick = {
-                        playerRef?.loadVideo(videoId, 0f)
                         estadoActividad = EstadoActividad.EN_PROGRESO
                         actualizarEstadoActividad(
                             coroutineScope = coroutineScope,
                             usuarioId = usuarioId,
                             recursoId = recurso.id,
-                            estado = estadoActividad
+                            estado = estadoActividad,
+                            estaEnPrograma = estaEnPrograma,
+                            cambiarEstadoActividadPrograma
                         )
+                        // Reproducimos el video cuando se presiona el botón
+                        youTubePlayer?.play()
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.primary
@@ -93,7 +106,6 @@ fun ActividadContenido(
             }
 
             EstadoActividad.EN_PROGRESO -> {
-                // Mostramos un botón deshabilitado con indicador de progreso
                 Button(
                     onClick = { /* No acción durante progreso */ },
                     enabled = false,
@@ -109,9 +121,7 @@ fun ActividadContenido(
 
             EstadoActividad.TERMINADA -> {
                 Button(
-                    onClick = {
-                        navController.popBackStack()
-                    },
+                    onClick = { navController.popBackStack() },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.tertiary
                     ),
@@ -129,6 +139,8 @@ fun actualizarEstadoActividad(
     usuarioId: String,
     recursoId: String,
     estado: EstadoActividad,
+    estaEnPrograma: Boolean,
+    cambiarEstadoActividadPrograma: (nuevoEstado: String) -> Unit,
     onSuccess: () -> Unit = {},
     onError: (Throwable) -> Unit = {}
 ) {
@@ -136,15 +148,18 @@ fun actualizarEstadoActividad(
         try {
             when (estado) {
                 EstadoActividad.EN_PROGRESO -> {
-                    apiService.iniciarActividad(usuarioId, recursoId)
+                    if(!estaEnPrograma) {
+                        apiService.iniciarActividad(usuarioId, recursoId)
+                    }
+                    cambiarEstadoActividadPrograma("en_progreso")
                 }
                 EstadoActividad.TERMINADA -> {
-                    apiService.completarActividad(usuarioId, recursoId)
+                    if(!estaEnPrograma) {
+                        apiService.completarActividad(usuarioId, recursoId)
+                    }
+                    cambiarEstadoActividadPrograma("completado")
                 }
-                else -> {
-                    // No se requiere acción para NO_INICIADA
-                    return@launch
-                }
+                else -> return@launch
             }
             onSuccess()
         } catch (e: Exception) {

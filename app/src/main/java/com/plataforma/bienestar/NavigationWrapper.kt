@@ -22,6 +22,8 @@ import com.plataforma.bienestar.app.PantallaApp
 import com.plataforma.bienestar.app.home.PantallaBusqueda
 import com.plataforma.bienestar.app.home.detalles_recursos.PantallaRecurso
 import com.google.firebase.auth.UserProfileChangeRequest
+import com.plataforma.bienestar.app.programas.PantallaBusquedaPrograma
+import com.plataforma.bienestar.app.programas.PantallaProgramaContenido
 
 @Composable
 fun NavigationWrapper(
@@ -137,16 +139,17 @@ fun NavigationWrapper(
         }
 
         composable(
-            route = "busqueda_recursos/{parametro}",
+            route = "busqueda_recursos/{parametro}/{usuarioId}",
             arguments = listOf(
-                navArgument("parametro") {
-                    type = NavType.StringType
-                }
+                navArgument("parametro") { type = NavType.StringType },
+                navArgument("usuarioId") { type = NavType.StringType }
             )
         ) { backStackEntry ->
             val parametro = backStackEntry.arguments?.getString("parametro") ?: ""
+            val usuarioId = backStackEntry.arguments?.getString("usuarioId") ?: ""
             PantallaBusqueda(
                 parametro = parametro,
+                idUsuario = usuarioId,
                 navController = navHostController
             )
         }
@@ -163,6 +166,39 @@ fun NavigationWrapper(
 
             PantallaRecurso(
                 recursoId = recursoId,
+                usuarioId = usuarioId,
+                navController = navHostController
+            )
+        }
+
+        composable(
+            route = "busqueda_programas/{parametro}/{usuarioId}",
+            arguments = listOf(
+                navArgument("parametro") { type = NavType.StringType },
+                navArgument("usuarioId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val parametro = backStackEntry.arguments?.getString("parametro") ?: ""
+            val usuarioId = backStackEntry.arguments?.getString("usuarioId") ?: ""
+            PantallaBusquedaPrograma(
+                parametro = parametro,
+                idUsuario = usuarioId,
+                navController = navHostController
+            )
+        }
+
+        composable(
+            route = "programa_detalle/{programaId}/{usuarioId}",
+            arguments = listOf(
+                navArgument("programaId") { type = NavType.StringType },
+                navArgument("usuarioId") { type = NavType.StringType }
+            )
+        ) { backStackEntry ->
+            val programaId = backStackEntry.arguments?.getString("programaId") ?: ""
+            val usuarioId = backStackEntry.arguments?.getString("usuarioId") ?: ""
+
+            PantallaProgramaContenido(
+                programaId = programaId,
                 usuarioId = usuarioId,
                 navController = navHostController
             )

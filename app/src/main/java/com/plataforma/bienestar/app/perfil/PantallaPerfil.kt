@@ -1,7 +1,7 @@
 package com.plataforma.bienestar.app.perfil
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
-
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -11,9 +11,14 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.rememberNavController
 import com.plataforma.bienestar.app.BaseScreen
 import com.plataforma.bienestar.app.TabViewModel
+import com.plataforma.bienestar.data.api.ApiClient
+import com.plataforma.bienestar.data.api.model.EmocionGrafica
 import com.plataforma.bienestar.ui.theme.BienestarTheme
+import java.util.Locale
 
 @Composable
 fun PantallaPerfil(
@@ -23,25 +28,64 @@ fun PantallaPerfil(
     metodoAutenticacion: String,
     userName: String? = null,
     idUsuario: String,
+    navController: NavController,
     onNameUpdated: (String) -> Unit = {},
     tabViewModel: TabViewModel = viewModel()
 ) {
-    // Estado para el nombre
+    // Estados para la gráfica
+    val emociones = remember { mutableStateListOf<EmocionGrafica>() }
+    val isLoading = remember { mutableStateOf(false) }
+    val error = remember { mutableStateOf<String?>(null) }
+
+    // Cargar emociones al iniciar o cuando cambia el idUsuario
+    LaunchedEffect(idUsuario) {
+        isLoading.value = true
+        try {
+            val response = ApiClient.apiService.getEmocionesHistorial(idUsuario)
+            emociones.clear()
+            emociones.addAll(response.emociones)
+            isLoading.value = false
+        } catch (e: Exception) {
+            error.value = "Error al cargar emociones: ${e.message}"
+            isLoading.value = false
+            Log.e("Emociones", error.value!!)
+        }
+    }
+
+    // Estados existentes
     var currentUserName by remember { mutableStateOf(userName ?: "") }
 
-    // Estados para controlar qué pantalla mostrar
     var showChangeNameDialog by remember { mutableStateOf(false) }
     var showChangePasswordDialog by remember { mutableStateOf(false) }
-
-    // Estados para los formularios
     var newName by remember { mutableStateOf(userName ?: "") }
+
     var oldPassword by remember { mutableStateOf("") }
     var newPassword by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
 
+    var historialActivo by remember { mutableStateOf<String?>(null) }
+    var estadoItem by remember { mutableStateOf("completado") }
+
+    // Definir los estados disponibles según el tipo de historial
+    val estadosDisponibles = remember(historialActivo) {
+        when (historialActivo) {
+            "recursos" -> listOf("en_progreso","visto", "completado")
+            "programas" -> listOf("en_progreso","completado")
+            else -> emptyList()
+        }
+    }
+
     // Actualizar el estado local cuando cambia el prop
     LaunchedEffect(userName) {
         userName?.let { currentUserName = it }
+    }
+
+    // Resetear el estadoItem cuando cambia el historialActivo
+    LaunchedEffect(historialActivo) {
+        if (historialActivo != null) {
+            // Establecer el primer estado disponible como predeterminado
+            estadoItem = estadosDisponibles.firstOrNull() ?: "completado"
+        }
     }
 
     BaseScreen(
@@ -53,25 +97,139 @@ fun PantallaPerfil(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(16.dp)
             ) {
-
-                // Mostrar nombre de usuario si está disponible
+                // Mostrar nombre de usuario
                 userName?.let { _ ->
                     Text(
-                        text = "Usuario: $currentUserName",
+                        text = currentUserName,
                         style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(16.dp)
+                        modifier = Modifier.padding(bottom = 16.dp)
                     )
                 }
 
+                // Sección de gráfica de emociones
+                Text(
+                    text = "Estadísticas emocionales de este mes:",
+                    style = MaterialTheme.typography.titleSmall,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                if (isLoading.value) {
+                    CircularProgressIndicator(modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .padding(vertical = 32.dp))
+                } else if (error.value != null) {
+                    Text(
+                        text = error.value!!,
+                        color = MaterialTheme.colorScheme.error,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                } else if (emociones.isEmpty()) {
+                    Text(
+                        text = "No hay datos emocionales para mostrar",
+                        modifier = Modifier.padding(vertical = 16.dp)
+                    )
+                } else {
+                    // Mostrar gráfica
+                    GraficaEmociones(
+                        emociones = emociones,
+                        modifier = Modifier
+                            .height(250.dp)
+                            .fillMaxWidth()
+                            .padding(bottom = 16.dp)
+                    )
+                }
+
+                Text(
+                    text = "Historial",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                // Selector de tipo de historial
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly
+                ) {
+                    FilterChip(
+                        selected = historialActivo == "recursos",
+                        onClick = {
+                            historialActivo = if (historialActivo == "recursos") null else "recursos"
+                        },
+                        label = { Text("Recursos") }
+                    )
+                    FilterChip(
+                        selected = historialActivo == "programas",
+                        onClick = {
+                            historialActivo = if (historialActivo == "programas") null else "programas"
+                        },
+                        label = { Text("Programas") }
+                    )
+                }
+
+                // Selector de estado (solo si hay historial activo)
+                if (historialActivo != null && estadosDisponibles.isNotEmpty()) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        estadosDisponibles.forEach { estado ->
+                            FilterChip(
+                                selected = estadoItem == estado,
+                                onClick = { estadoItem = estado },
+                                label = {
+                                    Text(
+                                        estado.replace("_", " ")
+                                            .replaceFirstChar {
+                                                if (it.isLowerCase()) it.titlecase(Locale.ROOT)
+                                                else it.toString()
+                                            }
+                                    )
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Mostrar el historial seleccionado
+                when (historialActivo) {
+                    "recursos" -> HistorialRecursos(
+                        idUsuario = idUsuario,
+                        estado = estadoItem,
+                        navController = navController,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp)
+                            .padding(top = 8.dp)
+                    )
+                    "programas" -> HistorialProgramas(
+                        idUsuario = idUsuario,
+                        estado = estadoItem,
+                        navController = navController,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 300.dp)
+                            .padding(top = 8.dp)
+                    )
+                }
+
+                Text(
+                    text = "Opciones Usuario",
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+
+                // Botones existentes
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 8.dp, vertical = 16.dp),
+                        .padding(vertical = 16.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Botón para cambiar nombre
                     Button(
                         onClick = { showChangeNameDialog = true },
                         modifier = Modifier
@@ -81,7 +239,6 @@ fun PantallaPerfil(
                         Text("Cambiar nombre", textAlign = TextAlign.Center)
                     }
 
-                    // Botón para cerrar sesión
                     Button(
                         onClick = onLogout,
                         modifier = Modifier
@@ -95,8 +252,7 @@ fun PantallaPerfil(
                         Text("Cerrar sesión", textAlign = TextAlign.Center)
                     }
 
-                    // Botón para cambiar contraseña
-                    if(metodoAutenticacion == "Correo"){
+                    if(metodoAutenticacion == "Correo") {
                         Button(
                             onClick = { showChangePasswordDialog = true },
                             modifier = Modifier
@@ -131,7 +287,7 @@ fun PantallaPerfil(
                     onClick = {
                         onChangeName(newName)
                         currentUserName = newName
-                        onNameUpdated(newName) // Notificamos el cambio
+                        onNameUpdated(newName)
                         showChangeNameDialog = false
                     }
                 ) {
@@ -204,18 +360,19 @@ fun PantallaPerfil(
     }
 }
 
-// El Preview sigue exactamente igual
 @Preview(showBackground = true)
 @Composable
 fun PantallaPerfilPreview() {
     BienestarTheme {
+        val navController = rememberNavController()
         PantallaPerfil(
             onLogout = {},
             onChangeName = {},
             onChangePassword = { _, _ -> },
             metodoAutenticacion = "Correo",
             userName = "Usuario Ejemplo",
-            idUsuario = "UHbnffsmeDQHuGOY4dig8sW9yRy1"
+            idUsuario = "UHbnffsmeDQHuGOY4dig8sW9yRy1",
+            navController = navController
         )
     }
 }

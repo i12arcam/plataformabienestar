@@ -4,9 +4,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
-    private const val BASE_URL2 = "http://10.0.2.2:5000"
+    private const val BASE_URL = "http://10.0.2.2:5000"
     // Usar esta para dispositivo físico (reemplaza con tu IP)
-    private const val BASE_URL= "https://d48c3c0db7ce.ngrok-free.app"
+    private const val BASE_URL2= "https://65e71cc7683b.ngrok-free.app"
 
     private val retrofit by lazy {
         Retrofit.Builder()

@@ -25,6 +25,7 @@ fun BaseScreen(
     content: @Composable (PaddingValues) -> Unit,
     selectedTab: String = "home",
     onTabSelected: (String) -> Unit,
+    showNavigationBar: Boolean = true,
     onMenuClick: () -> Unit = {}
 ) {
     Scaffold(
@@ -82,70 +83,72 @@ fun BaseScreen(
 
         // --- 3. BOTTOM BAR ---
         bottomBar = {
-            NavigationBar(
-                containerColor = MainGreen,
-                modifier = Modifier.height(56.dp)
-            ) {
-                NavigationBarItem(
-                    selected = selectedTab == "home",
-                    onClick = { onTabSelected("home") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.home),
-                            contentDescription = "Inicio",
-                            modifier = Modifier.size(24.dp),
-                            tint = if (selectedTab == "home") DarkGreen else Color.White
-                        )
-                    }
-                )
-                NavigationBarItem(
-                    selected = selectedTab == "programas",
-                    onClick = { onTabSelected("programas") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.programas),
-                            contentDescription = "Programas",
-                            modifier = Modifier.size(24.dp),
-                            tint = if (selectedTab == "programas") DarkGreen else Color.White
-                        )
-                    }
-                )
-                NavigationBarItem(
-                    selected = selectedTab == "emociones",
-                    onClick = { onTabSelected("emociones") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.emociones),
-                            contentDescription = "Emociones",
-                            modifier = Modifier.size(24.dp),
-                            tint = if (selectedTab == "emociones") DarkGreen else Color.White
-                        )
-                    }
-                )
-                NavigationBarItem(
-                    selected = selectedTab == "metas",
-                    onClick = { onTabSelected("metas") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.metas),
-                            contentDescription = "Metas",
-                            modifier = Modifier.size(24.dp),
-                            tint = if (selectedTab == "metas") DarkGreen else Color.White
-                        )
-                    }
-                )
-                NavigationBarItem(
-                    selected = selectedTab == "perfil",
-                    onClick = { onTabSelected("perfil") },
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = R.drawable.perfil),
-                            contentDescription = "Perfil",
-                            modifier = Modifier.size(24.dp),
-                            tint = if (selectedTab == "perfil") DarkGreen else Color.White
-                        )
-                    }
-                )
+            if(showNavigationBar) {
+                NavigationBar(
+                    containerColor = MainGreen,
+                    modifier = Modifier.height(56.dp)
+                ) {
+                    NavigationBarItem(
+                        selected = selectedTab == "home",
+                        onClick = { onTabSelected("home") },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.home),
+                                contentDescription = "Inicio",
+                                modifier = Modifier.size(24.dp),
+                                tint = if (selectedTab == "home") DarkGreen else Color.White
+                            )
+                        }
+                    )
+                    NavigationBarItem(
+                        selected = selectedTab == "programas",
+                        onClick = { onTabSelected("programas") },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.programas),
+                                contentDescription = "Programas",
+                                modifier = Modifier.size(24.dp),
+                                tint = if (selectedTab == "programas") DarkGreen else Color.White
+                            )
+                        }
+                    )
+                    NavigationBarItem(
+                        selected = selectedTab == "emociones",
+                        onClick = { onTabSelected("emociones") },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.emociones),
+                                contentDescription = "Emociones",
+                                modifier = Modifier.size(24.dp),
+                                tint = if (selectedTab == "emociones") DarkGreen else Color.White
+                            )
+                        }
+                    )
+                    NavigationBarItem(
+                        selected = selectedTab == "metas",
+                        onClick = { onTabSelected("metas") },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.metas),
+                                contentDescription = "Metas",
+                                modifier = Modifier.size(24.dp),
+                                tint = if (selectedTab == "metas") DarkGreen else Color.White
+                            )
+                        }
+                    )
+                    NavigationBarItem(
+                        selected = selectedTab == "perfil",
+                        onClick = { onTabSelected("perfil") },
+                        icon = {
+                            Icon(
+                                painter = painterResource(id = R.drawable.perfil),
+                                contentDescription = "Perfil",
+                                modifier = Modifier.size(24.dp),
+                                tint = if (selectedTab == "perfil") DarkGreen else Color.White
+                            )
+                        }
+                    )
+                }
             }
         }
     )

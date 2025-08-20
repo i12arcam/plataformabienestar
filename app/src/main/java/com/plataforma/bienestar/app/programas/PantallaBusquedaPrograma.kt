@@ -1,4 +1,4 @@
-package com.plataforma.bienestar.app.home
+package com.plataforma.bienestar.app.programas
 
 import android.util.Log
 import androidx.compose.foundation.clickable
@@ -12,6 +12,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
@@ -25,39 +26,39 @@ import com.plataforma.bienestar.R
 import com.plataforma.bienestar.app.BaseScreen
 import com.plataforma.bienestar.app.TabViewModel
 import com.plataforma.bienestar.data.api.ApiClient
-import com.plataforma.bienestar.data.api.model.Recurso
+import com.plataforma.bienestar.data.api.model.Programa
+import com.plataforma.bienestar.data.api.model.UsuarioPrograma
 import com.plataforma.bienestar.ui.theme.DarkGreen
 import com.plataforma.bienestar.ui.theme.GrayBlue
 
 @Composable
-fun PantallaBusqueda(
+fun PantallaBusquedaPrograma(
     parametro: String,
     navController: NavController,
     tabViewModel: TabViewModel = viewModel(),
     idUsuario: String
 ) {
-
-    var coincidencias by remember { mutableStateOf<List<Recurso>>(emptyList()) }
+    var coincidencias by remember { mutableStateOf<List<Programa>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     var showError by remember { mutableStateOf(false) }
 
-    val categorias = listOf("Afrontamiento Emocional", "Autoconocimiento", "Autoaceptacion",
-        "Desarrollo Personal", "Habilidades Sociales", "Manejo del Estres", "Meditacion",
-        "Mindfulness", "Relaciones Saludables", "Respiracion", "Sueño", "Yoga")
+    val categorias = listOf("Afrontamiento emocional", "Autoconocimiento", "Autoaceptacion",
+        "Desarrollo personal", "Habilidades sociales", "Manejo del Estres", "Meditacion",
+        "Mindfulness", "Relaciones saludables", "Respiracion", "Sueño", "Yoga")
 
     var filtro by remember { mutableStateOf("titulo") }
     var searchText by remember { mutableStateOf(parametro) }
 
-
-    // Cargar el recurso cuando se abre la pantalla, o cambia el parametro o el filtro
+    // Cargar programas cuando se abre la pantalla, o cambia el parametro o el filtro
     LaunchedEffect(parametro, filtro) {
         isLoading = true
         try {
-            coincidencias = ApiClient.apiService.getRecursosBusqueda(parametro, filtro)
-            Log.d("Recursos", coincidencias.toString())
+            coincidencias = ApiClient.apiService.getProgramasBusqueda(parametro, filtro)
+            Log.d("Programas", coincidencias.toString())
         } catch (e: Exception) {
-            error = "Error al cargar el recurso: ${e.message}"
+            error = "Error al cargar los programas: ${e.message}"
+            Log.e("BusquedaPrograma", error!!)
         } finally {
             isLoading = false
         }
@@ -65,9 +66,7 @@ fun PantallaBusqueda(
 
     BaseScreen(
         selectedTab = tabViewModel.selectedTab.value,
-        onTabSelected = { tab ->
-            tabViewModel.selectTab(tab)
-        },
+        onTabSelected = { tab -> tabViewModel.selectTab(tab) },
         showNavigationBar = false,
         content = { _ ->
             Column(
@@ -86,7 +85,7 @@ fun PantallaBusqueda(
                     )
                     // Resultados Busqueda Titulo
                     Text(
-                        text = "Resultados búsqueda de $parametro",
+                        text = "Resultados búsqueda de '$parametro'",
                         modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 8.dp),
                         style = MaterialTheme.typography.titleLarge,
                         color = Color.DarkGray,
@@ -107,7 +106,7 @@ fun PantallaBusqueda(
                         )
                     },
                     placeholder = {
-                        Text(text = "Buscar contenido...")
+                        Text(text = "Buscar programas...")
                     },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.White,
@@ -121,18 +120,18 @@ fun PantallaBusqueda(
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(
                         imeAction = ImeAction.Search,
-                        // Asegurar que el teclado permita caracteres especiales
                         keyboardType = KeyboardType.Text,
                         autoCorrect = true,
                         capitalization = KeyboardCapitalization.Sentences
                     ),
                     keyboardActions = KeyboardActions(
                         onSearch = {
-                            Log.d("Navigation", "Navegando con : $searchText")
-                            navController.navigate("busqueda_recursos/$searchText/$idUsuario")
+                            Log.d("Navigation", "Navegando con: $searchText")
+                            navController.navigate("busqueda_programas/$searchText/$idUsuario")
                         }
                     )
                 )
+
                 if(showError) {
                     Log.d("Showerror","Mostrando error")
                     Column(modifier = Modifier.padding(horizontal = 16.dp)) {
@@ -169,7 +168,8 @@ fun PantallaBusqueda(
                         isSelected = filtro == "titulo",
                         onClick = {
                             showError = false
-                            filtro = "titulo" },
+                            filtro = "titulo"
+                        },
                         modifier = Modifier.weight(1f)
                     )
                     FilterButton(
@@ -185,27 +185,62 @@ fun PantallaBusqueda(
                             } else {
                                 Log.d("Showerror","True")
                                 showError = true
-                            }},
+                            }
+                        },
                         modifier = Modifier.weight(1f)
                     )
                 }
 
-                // Lista de recursos
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    items(coincidencias) { recurso ->
-                        RecursoItem(
-                            recurso = recurso,
-                            estado = "en_progreso",
-                            onClick = {
-                                Log.d("Navigation", "Navegando con : $recurso")
-                                navController.navigate("recurso_detalle/${recurso.id}/${idUsuario}")
-                            }
+                // Contenido principal
+                when {
+                    isLoading -> {
+                        Box(modifier = Modifier.fillMaxSize()) {
+                            CircularProgressIndicator(
+                                modifier = Modifier.align(Alignment.Center)
+                            )
+                        }
+                    }
+                    error != null -> {
+                        Text(
+                            text = error!!,
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(16.dp)
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                    }
+                    coincidencias.isEmpty() -> {
+                        Text(
+                            text = "No se encontraron programas",
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .align(Alignment.CenterHorizontally)
+                        )
+                    }
+                    else -> {
+                        LazyColumn(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            items(coincidencias) { programa ->
+                                var usuarioPrograma: UsuarioPrograma? = null
+                                LaunchedEffect(programa.id) {
+                                    try {
+                                        usuarioPrograma = ApiClient.apiService.obtenerUsuarioPrograma(idUsuario, programa.id)
+                                    } catch (e: Exception) {
+                                        Log.d("No encontrado", "No se pudo cargar UsuarioPrograma para ${programa.id}")
+                                    }
+                                }
+
+                                ProgramaItem(
+                                    programa = programa,
+                                    usuarioPrograma = usuarioPrograma,
+                                    onClick = {
+                                        navController.navigate("programa_detalle/${programa.id}/$idUsuario")
+                                    }
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
+                        }
                     }
                 }
             }

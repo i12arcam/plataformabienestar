@@ -13,6 +13,7 @@ import com.plataforma.bienestar.app.emociones.PantallaEmociones
 import com.plataforma.bienestar.app.home.PantallaHome
 import com.plataforma.bienestar.app.metas.PantallaMetas
 import com.plataforma.bienestar.app.perfil.PantallaPerfil
+import com.plataforma.bienestar.app.programas.PantallaProgramas
 
 @Composable
 fun PantallaApp(
@@ -34,7 +35,7 @@ fun PantallaApp(
 
     when (tabViewModel.selectedTab.value) {
         "home" -> PantallaHome(idUsuario, navController)
-        "programas" -> PantallaProgramas(currentUserName, idUsuario)
+        "programas" -> PantallaProgramas(idUsuario, navController)
         "emociones" -> PantallaEmociones(idUsuario)
         "metas" -> PantallaMetas(idUsuario)
         "perfil" -> PantallaPerfil(
@@ -47,6 +48,7 @@ fun PantallaApp(
             metodoAutenticacion = metodoAutenticacion,
             userName = currentUserName,
             idUsuario = idUsuario,
+            navController,
             onNameUpdated = { newName -> currentUserName = newName }
         )
     }

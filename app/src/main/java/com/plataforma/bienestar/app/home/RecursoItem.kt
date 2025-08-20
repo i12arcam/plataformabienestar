@@ -2,6 +2,7 @@ package com.plataforma.bienestar.app.home
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,12 +17,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.plataforma.bienestar.data.api.model.Recurso
+import java.util.Locale
 
 @Composable
 fun RecursoItem(
     recurso: Recurso,
+    estado: String?,
     onClick: () -> Unit
 ) {
     Card(
@@ -52,26 +56,47 @@ fun RecursoItem(
                 Spacer(modifier = Modifier.height(4.dp))
             }
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text="${recurso.tipo.replaceFirstChar { it.uppercase() }}",
-                    style = MaterialTheme.typography.labelSmall
-                )
-
-                recurso.duracion?.let {
+            Box(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
                     Text(
-                        text = "Duración: ${it} min",
+                        text = recurso.tipo.replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.labelSmall
                     )
+
+                    recurso.duracion?.let {
+                        Text(
+                            text = "Duración: $it min",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
+
+                    recurso.dificultad?.let {
+                        Text(
+                            text = "Dificultad: $it",
+                            style = MaterialTheme.typography.labelSmall
+                        )
+                    }
                 }
 
-                recurso.dificultad?.let {
+                estado?.let { estadoValue ->
+                    val (textoEstado, colorEstado) = when(estadoValue.lowercase(Locale.getDefault())) {
+                        "completado" -> "Completado" to Color.Green
+                        "visto" -> "Visto" to Color.Blue
+                        "en_progreso" -> "En progreso" to Color.Gray
+                        else -> estadoValue to MaterialTheme.colorScheme.onSurface
+                    }
+
                     Text(
-                        text = "Dificultad: $it",
-                        style = MaterialTheme.typography.labelSmall
+                        text = textoEstado,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = colorEstado,
+                        modifier = Modifier
+                            .align(Alignment.BottomEnd)
+                            .padding(top = 4.dp)
                     )
                 }
             }

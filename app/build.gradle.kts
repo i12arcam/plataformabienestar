@@ -97,5 +97,8 @@ dependencies {
     // Reproductor youtube
     implementation(libs.android.youtube.player)
 
+    // MPAndroidChart
+    implementation(libs.mpandroidchart)
+
 
 }

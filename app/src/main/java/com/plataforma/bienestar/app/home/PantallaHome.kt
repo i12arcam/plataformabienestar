@@ -31,6 +31,7 @@ import com.plataforma.bienestar.data.api.model.Recurso
 import com.plataforma.bienestar.ui.theme.BienestarTheme
 import com.plataforma.bienestar.ui.theme.GrayBlue
 import com.plataforma.bienestar.ui.theme.LightPurple
+import java.util.Locale
 
 @Composable
 fun PantallaHome(
@@ -48,8 +49,8 @@ fun PantallaHome(
 
     // Estado para los recursos
     var recursos by remember { mutableStateOf<List<Recurso>>(emptyList()) }
-
-    Log.d("IDUsuario", "IDUsuario: $idUsuario")
+    // Estado para almacenar los estados de los recursos (ahora como String)
+    var estadosRecursos by remember { mutableStateOf<Map<String, String?>>(emptyMap()) }
 
     // Llamada a la API cuando se carga la pantalla
     LaunchedEffect(Unit) {
@@ -61,6 +62,20 @@ fun PantallaHome(
 
             // Llamada para obtener recursos
             recursos = ApiClient.apiService.getRecursosSeleccionados(idUsuario)
+
+            // Obtener estados de todos los recursos
+            val estados = mutableMapOf<String, String?>()
+            recursos.forEach { recurso ->
+                try {
+                    val estado = ApiClient.apiService.getEstadoRecurso(idUsuario,recurso.id)
+                    estados[recurso.id] = estado.takeIf { it.isNotBlank() } // Solo guarda si no está vacío
+                } catch (e: Exception) {
+                    Log.e("PantallaHome", "Error al obtener estado del recurso ${recurso.id}: ${e.message}")
+                    estados[recurso.id] = null // No hay estado disponible
+                }
+            }
+            estadosRecursos = estados
+
             Log.d("Recursos", "Recursos: $recursos")
         } catch (e: Exception) {
             error = e.message ?: "Error al cargar los datos"
@@ -68,6 +83,19 @@ fun PantallaHome(
         } finally {
             isLoading = false
         }
+    }
+
+    // Lista de recursos ordenada
+    val recursosOrdenados = remember(recursos, estadosRecursos) {
+        recursos.sortedWith(compareBy { recurso ->
+            when (estadosRecursos[recurso.id]?.lowercase(Locale.getDefault())) {
+                "en_progreso" -> 1
+                null -> 2 // Undefined (sin estado)
+                "visto" -> 3
+                "completado" -> 4
+                else -> 5 // Cualquier otro estado no especificado
+            }
+        })
     }
 
     BaseScreen(
@@ -113,9 +141,8 @@ fun PantallaHome(
                         onSearch = {
                             Log.d("Navigation", "Navegando con : $searchText")
                             if(searchText != ""){
-                                navController.navigate("busqueda_recursos/$searchText")
+                                navController.navigate("busqueda_recursos/$searchText/$idUsuario")
                             }
-
                         }
                     )
                 )
@@ -164,9 +191,10 @@ fun PantallaHome(
                             .fillMaxWidth()
                             .padding(16.dp)
                     ) {
-                        items(recursos) { recurso ->
+                        items(recursosOrdenados) { recurso ->
                             RecursoItem(
                                 recurso = recurso,
+                                estado = estadosRecursos[recurso.id],
                                 onClick = {
                                     Log.d("Navigation", "Navegando con : $recurso y $idUsuario")
                                     navController.navigate("recurso_detalle/${recurso.id}/${idUsuario}")
