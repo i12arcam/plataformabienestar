@@ -3,13 +3,18 @@ package com.plataforma.bienestar.data.api
 import com.plataforma.bienestar.data.api.model.Consejo
 import com.plataforma.bienestar.data.api.model.Emocion
 import com.plataforma.bienestar.data.api.model.EmocionesHistorialResponse
+import com.plataforma.bienestar.data.api.model.Logro
+import com.plataforma.bienestar.data.api.model.LogroResponse
 import com.plataforma.bienestar.data.api.model.Meta
 import com.plataforma.bienestar.data.api.model.Programa
 import com.plataforma.bienestar.data.api.model.Recurso
+import com.plataforma.bienestar.data.api.model.RegistroAccion
 import com.plataforma.bienestar.data.api.model.Usuario
 import com.plataforma.bienestar.data.api.model.UsuarioPrograma
+import com.plataforma.bienestar.data.api.model.UsuarioProgreso
 import com.plataforma.bienestar.data.api.model.UsuarioRecurso
 import com.plataforma.bienestar.data.api.model.UsuarioResponse
+import com.plataforma.bienestar.data.api.model.XpResponse
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -156,5 +161,22 @@ interface ApiService {
         @Path("metaId") recursoId: String
     ): Meta
 
+    // Registros acciones
+    @POST("api/usuarioRegistros/registrar")
+    suspend fun registrarAccion(@Body registro: RegistroAccion): LogroResponse
+
+    // XP
+    @POST("api/usuarioProgreso/sumarxp")
+    suspend fun otorgarXp(@Body registro: RegistroAccion): XpResponse
+
+    @GET("api/usuarioProgreso/obtenerxp/{usuarioId}")
+    suspend fun obtenerXp(
+        @Path("usuarioId") usuarioId: String
+    ): UsuarioProgreso
+
+    @GET("api/logros/usuario/{usuarioId}")
+    suspend fun obtenerLogrosUsuario(
+        @Path("usuarioId") usuarioId: String
+    ): List<Logro>
 
 }

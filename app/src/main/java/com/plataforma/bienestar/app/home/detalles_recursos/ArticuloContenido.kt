@@ -12,6 +12,7 @@ import com.plataforma.bienestar.data.api.ApiClient
 import com.plataforma.bienestar.data.api.model.Recurso
 import kotlinx.coroutines.launch
 import androidx.core.net.toUri
+import com.plataforma.bienestar.util.GestorXP
 
 @Composable
 fun ArticuloContenido(
@@ -31,6 +32,16 @@ fun ArticuloContenido(
             try {
                 if (!estaEnPrograma) { // No está en programa, se setea a Visto
                     ApiClient.apiService.setRecursoVisto(usuarioId, recurso.id)
+
+                    // Xp y Logros
+                    GestorXP.registrarAccionYOtorgarXP(
+                        usuarioId = usuarioId,
+                        evento = "visualizar_articulo",
+                        dificultad = recurso.dificultad,
+                        duracion = recurso.duracion,
+                        scope = coroutineScope
+                    )
+
                 } else { // Está en programa. No se setea a visto para el recurso, sino completado para el programa
                     cambiarEstadoActividadPrograma("completado")
                 }

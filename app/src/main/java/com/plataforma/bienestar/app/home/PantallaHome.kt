@@ -49,7 +49,7 @@ fun PantallaHome(
 
     // Estado para los recursos
     var recursos by remember { mutableStateOf<List<Recurso>>(emptyList()) }
-    // Estado para almacenar los estados de los recursos (ahora como String)
+    // Estado para almacenar los estados de los recursos
     var estadosRecursos by remember { mutableStateOf<Map<String, String?>>(emptyMap()) }
 
     // Llamada a la API cuando se carga la pantalla

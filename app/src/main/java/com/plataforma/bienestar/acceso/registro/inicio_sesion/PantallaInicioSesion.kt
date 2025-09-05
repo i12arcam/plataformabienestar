@@ -3,6 +3,7 @@ package com.plataforma.bienestar.acceso.registro.inicio_sesion
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -21,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +37,7 @@ import com.plataforma.bienestar.R
 import com.plataforma.bienestar.ui.theme.BackgroundGreen
 import com.plataforma.bienestar.ui.theme.DarkGreen
 import com.plataforma.bienestar.ui.theme.MainGreen
+import com.plataforma.bienestar.util.GestorXP
 
 @Composable
 fun PantallaInicioSesion(
@@ -44,6 +47,8 @@ fun PantallaInicioSesion(
 {
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+
+    val scope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -59,7 +64,10 @@ fun PantallaInicioSesion(
                 contentDescription = "",
                 tint = White,
                 modifier = Modifier
-                    .clickable { navController.popBackStack() }
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { navController.popBackStack() }
                     .padding(vertical = 24.dp)
                     .size(24.dp)
             )
@@ -93,8 +101,20 @@ fun PantallaInicioSesion(
             onClick = {
             auth.signInWithEmailAndPassword(email, password).addOnCompleteListener{ task ->
                 if(task.isSuccessful){
-                    navController.navigate("app") {
-                        popUpTo("inicio_sesion") { inclusive = true }
+                    Log.d("Admin", email)
+                    if(email.equals("mindauragestor@gmail.com", ignoreCase = true)) {
+                        navController.navigate("gestor") {
+                            popUpTo("inicio_sesion") { inclusive = true }
+                        }
+                    } else {
+                        GestorXP.registrarAccionYOtorgarXP(
+                            usuarioId = auth.uid!!,
+                            evento = "iniciar_sesion",
+                            scope = scope
+                        )
+                        navController.navigate("app") {
+                            popUpTo("inicio_sesion") { inclusive = true }
+                        }
                     }
                     Log.i("aris", "LOGIN OK")
                 }else{

@@ -28,6 +28,7 @@ import com.plataforma.bienestar.data.api.ApiClient
 import com.plataforma.bienestar.data.api.model.Recurso
 import com.plataforma.bienestar.ui.theme.DarkGreen
 import com.plataforma.bienestar.ui.theme.GrayBlue
+import java.util.Locale
 
 @Composable
 fun PantallaBusqueda(
@@ -37,9 +38,9 @@ fun PantallaBusqueda(
     idUsuario: String
 ) {
 
-    var coincidencias by remember { mutableStateOf<List<Recurso>>(emptyList()) }
-    var isLoading by remember { mutableStateOf(true) }
-    var error by remember { mutableStateOf<String?>(null) }
+    var recursos by remember { mutableStateOf<List<Recurso>>(emptyList()) }
+    var estadosRecursos by remember { mutableStateOf<Map<String, String?>>(emptyMap()) }
+
     var showError by remember { mutableStateOf(false) }
 
     val categorias = listOf("Afrontamiento Emocional", "Autoconocimiento", "Autoaceptacion",
@@ -52,15 +53,39 @@ fun PantallaBusqueda(
 
     // Cargar el recurso cuando se abre la pantalla, o cambia el parametro o el filtro
     LaunchedEffect(parametro, filtro) {
-        isLoading = true
         try {
-            coincidencias = ApiClient.apiService.getRecursosBusqueda(parametro, filtro)
-            Log.d("Recursos", coincidencias.toString())
+            recursos = ApiClient.apiService.getRecursosBusqueda(parametro, filtro)
+
+            // Obtener estados de todos los recursos
+            val estados = mutableMapOf<String, String?>()
+            recursos.forEach { recurso ->
+                try {
+                    val estado = ApiClient.apiService.getEstadoRecurso(idUsuario,recurso.id)
+                    estados[recurso.id] = estado.takeIf { it.isNotBlank() } // Solo guarda si no está vacío
+                } catch (e: Exception) {
+                    Log.e("PantallaHome", "Error al obtener estado del recurso ${recurso.id}: ${e.message}")
+                    estados[recurso.id] = null // No hay estado disponible
+                }
+            }
+            estadosRecursos = estados
+
+            Log.d("Recursos", recursos.toString())
         } catch (e: Exception) {
-            error = "Error al cargar el recurso: ${e.message}"
-        } finally {
-            isLoading = false
+            Log.e("Error recurso","Error al cargar el recurso: ${e.message}")
         }
+    }
+
+    // Lista de recursos ordenada
+    val recursosOrdenados = remember(recursos, estadosRecursos) {
+        recursos.sortedWith(compareBy { recurso ->
+            when (estadosRecursos[recurso.id]?.lowercase(Locale.getDefault())) {
+                "en_progreso" -> 1
+                null -> 2 // Undefined (sin estado)
+                "visto" -> 3
+                "completado" -> 4
+                else -> 5 // Cualquier otro estado no especificado
+            }
+        })
     }
 
     BaseScreen(
@@ -119,12 +144,10 @@ fun PantallaBusqueda(
                     ),
                     shape = RoundedCornerShape(28.dp),
                     singleLine = true,
-                    keyboardOptions = KeyboardOptions(
-                        imeAction = ImeAction.Search,
-                        // Asegurar que el teclado permita caracteres especiales
+                    keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences,
                         keyboardType = KeyboardType.Text,
-                        autoCorrect = true,
-                        capitalization = KeyboardCapitalization.Sentences
+                        imeAction = ImeAction.Search
+                        // Asegurar que el teclado permita caracteres especiales
                     ),
                     keyboardActions = KeyboardActions(
                         onSearch = {
@@ -196,10 +219,10 @@ fun PantallaBusqueda(
                         .fillMaxWidth()
                         .padding(16.dp)
                 ) {
-                    items(coincidencias) { recurso ->
+                    items(recursosOrdenados) { recurso ->
                         RecursoItem(
                             recurso = recurso,
-                            estado = "en_progreso",
+                            estado = estadosRecursos[recurso.id],
                             onClick = {
                                 Log.d("Navigation", "Navegando con : $recurso")
                                 navController.navigate("recurso_detalle/${recurso.id}/${idUsuario}")

@@ -8,6 +8,7 @@ import com.plataforma.bienestar.app.BaseScreen
 import com.plataforma.bienestar.app.TabViewModel
 import com.plataforma.bienestar.data.api.ApiClient
 import com.plataforma.bienestar.data.api.model.Recurso
+import com.plataforma.bienestar.util.GestorXP
 
 @Composable
 fun PantallaRecurso(
@@ -32,7 +33,7 @@ fun PantallaRecurso(
             try {
                 estado = ApiClient.apiService.getEstadoRecurso(usuarioId, recurso!!.id)
             } catch (e: Exception) {
-                Log.e("PantallaRecurso", "Error al obtener estado del recurso: ${e.message}")
+                Log.d("PantallaRecurso", "Error al obtener estado del recurso: ${e.message}")
                 estado = null // No hay estado disponible
             }
         } catch (e: Exception) {
@@ -61,4 +62,5 @@ fun PantallaRecurso(
             )
         }
     )
+    GestorXP.MostrarPopupsAutomaticos()
 }

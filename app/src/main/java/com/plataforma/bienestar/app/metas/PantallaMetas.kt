@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -21,6 +22,7 @@ import com.plataforma.bienestar.app.TabViewModel
 import com.plataforma.bienestar.data.api.ApiClient
 import com.plataforma.bienestar.data.api.model.Meta
 import com.plataforma.bienestar.ui.theme.BienestarTheme
+import com.plataforma.bienestar.util.GestorXP
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -174,7 +176,7 @@ fun PantallaMetas(
                             OutlinedTextField(
                                 value = diasDuracion,
                                 onValueChange = { newValue ->
-                                    if (newValue.isEmpty() || newValue.matches(Regex("^\\d+\$"))) {
+                                    if (newValue.isEmpty() || newValue.matches(Regex("^\\d+$"))) {
                                         diasDuracion = newValue
                                     }
                                 },
@@ -187,24 +189,24 @@ fun PantallaMetas(
                             var expandedDificultad by remember { mutableStateOf(false) }
                             val dificultades = listOf("Fácil", "Media", "Difícil")
 
-                            ExposedDropdownMenuBox(
-                                expanded = expandedDificultad,
-                                onExpandedChange = { expandedDificultad = it }
-                            ) {
+                            Box {
                                 OutlinedTextField(
                                     value = dificultad,
-                                    onValueChange = {}, // No se permite edición manual
+                                    onValueChange = {},
                                     label = { Text("Dificultad") },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .menuAnchor(), // Asegura que el menú se ancle correctamente
+                                    modifier = Modifier.fillMaxWidth(),
                                     readOnly = true,
                                     trailingIcon = {
-                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedDificultad)
+                                        IconButton(onClick = { expandedDificultad = true }) {
+                                            Icon(
+                                                imageVector = Icons.Default.ArrowDropDown,
+                                                contentDescription = "Seleccionar dificultad"
+                                            )
+                                        }
                                     }
                                 )
 
-                                ExposedDropdownMenu(
+                                DropdownMenu(
                                     expanded = expandedDificultad,
                                     onDismissRequest = { expandedDificultad = false }
                                 ) {
@@ -214,7 +216,6 @@ fun PantallaMetas(
                                             onClick = {
                                                 dificultad = item
                                                 expandedDificultad = false
-                                                Log.d("Dificultad", "Seleccionado: $item")
                                             }
                                         )
                                     }
@@ -317,6 +318,14 @@ fun PantallaMetas(
                                     scope.launch {
                                         try {
                                             ApiClient.apiService.incrementarDiasMeta(meta.id!!)
+                                            // Xp y Logros
+                                            GestorXP.registrarAccionYOtorgarXP(
+                                                usuarioId = idUsuario,
+                                                evento = "incrementar_meta",
+                                                dificultad = meta.dificultad,
+                                                scope = scope
+                                            )
+
                                         } catch (e: Exception) {
                                             Log.e("Registro Meta", "Error en backend: ${e.message}")
                                         }

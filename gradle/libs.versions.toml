@@ -1,13 +1,13 @@
 [versions]
-agp = "8.5.0"
-kotlin = "1.9.0"
+agp = "8.6.0"
+kotlin = "1.9.22"
 coreKtx = "1.15.0"
 junit = "4.13.2"
 junitVersion = "1.2.1"
 espressoCore = "3.6.1"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.10.1"
-composeBom = "2024.04.01"
+composeBom = "2025.08.01"
 firebaseBom = "33.1.1"
 services = "4.4.2"
 crashlytics = "3.0.2"
@@ -27,6 +27,12 @@ retrofit-serialization-converter = "1.0.0"
 youtubePlayer = "12.1.0"
 
 mpandroidchart = "3.1.0"
+
+workVersion = "2.9.0"
+constraintlayout = "2.2.1"
+foundation = "1.9.0"
+uiText = "1.9.0"
+material3 = "1.3.2"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -68,6 +74,13 @@ retrofit2-kotlinx-serialization-converter = { module = "com.jakewharton.retrofit
 android-youtube-player = { group = "com.pierfrancescosoffritti.androidyoutubeplayer", name = "core", version.ref = "youtubePlayer" }
 
 mpandroidchart = { group = "com.github.PhilJay", name = "MPAndroidChart", version.ref = "mpandroidchart" }
+
+androidx-core-notifications = { group = "androidx.core", name = "core", version.ref = "coreKtx" }
+androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workVersion" }
+androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+androidx-foundation = { group = "androidx.compose.foundation", name = "foundation", version.ref = "foundation" }
+androidx-ui-text = { group = "androidx.compose.ui", name = "ui-text", version.ref = "uiText" }
+material3 = { group = "androidx.compose.material3", name = "material3", version.ref = "material3" }
 
 [plugins]
 googleServices = { id = "com.google.gms.google-services", version.ref = "services"}

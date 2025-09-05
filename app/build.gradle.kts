@@ -44,7 +44,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.8"
     }
     packaging {
         resources {
@@ -73,6 +73,11 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.appcompat)
     implementation(libs.googleid)
+    implementation(libs.androidx.constraintlayout)
+    implementation(libs.androidx.ui.text)
+    implementation(libs.androidx.foundation)
+    implementation(libs.material3)
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
@@ -99,6 +104,10 @@ dependencies {
 
     // MPAndroidChart
     implementation(libs.mpandroidchart)
+
+    // Notificaciones
+    implementation(libs.androidx.work.runtime.ktx)
+    implementation(libs.androidx.core.notifications)
 
 
 }

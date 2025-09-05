@@ -6,7 +6,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 object ApiClient {
     private const val BASE_URL = "http://10.0.2.2:5000"
     // Usar esta para dispositivo físico (reemplaza con tu IP)
-    private const val BASE_URL2= "https://65e71cc7683b.ngrok-free.app"
+    private const val BASE_URL2 = "https://d6d97494333b.ngrok-free.app"
 
     private val retrofit by lazy {
         Retrofit.Builder()
@@ -17,5 +17,9 @@ object ApiClient {
 
     val apiService: ApiService by lazy {
         retrofit.create(ApiService::class.java)
+    }
+
+    val apiServiceGestor: ApiServiceGestor by lazy {
+        retrofit.create(ApiServiceGestor::class.java)
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.plataforma.bienestar.data.api.ApiClient
 import com.plataforma.bienestar.data.api.model.Recurso
+import com.plataforma.bienestar.util.GestorXP
 import kotlinx.coroutines.launch
 
 @Composable
@@ -26,6 +27,16 @@ fun VideoContenido(
             try {
                 if (!estaEnPrograma) { // No está en programa, se setea a Visto
                     ApiClient.apiService.setRecursoVisto(usuarioId, recurso.id)
+
+                    // Xp y Logros
+                    GestorXP.registrarAccionYOtorgarXP(
+                        usuarioId = usuarioId,
+                        evento = "visualizar_video",
+                        dificultad = recurso.dificultad,
+                        duracion = recurso.duracion,
+                        scope = coroutineScope
+                    )
+                    
                 } else { // Está en programa. No se setea a visto para el recurso, sino completado para el programa
                     cambiarEstadoActividadPrograma("completado")
                 }

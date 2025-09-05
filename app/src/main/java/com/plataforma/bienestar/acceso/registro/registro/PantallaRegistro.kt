@@ -3,6 +3,7 @@ package com.plataforma.bienestar.acceso.registro.registro
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -57,13 +58,16 @@ fun PantallaRegistro(auth: FirebaseAuth, navController: NavHostController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        Row(){
+        Row{
             Icon(
                 painter = painterResource(id = R.drawable.baseline_arrow_back_24),
                 contentDescription = "",
                 tint = White,
                 modifier = Modifier
-                    .clickable { navController.popBackStack() }
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null
+                    ) { navController.popBackStack() }
                     .padding(vertical = 24.dp)
                     .size(24.dp)
             )

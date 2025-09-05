@@ -6,6 +6,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -24,13 +25,17 @@ import com.plataforma.bienestar.app.home.detalles_recursos.PantallaRecurso
 import com.google.firebase.auth.UserProfileChangeRequest
 import com.plataforma.bienestar.app.programas.PantallaBusquedaPrograma
 import com.plataforma.bienestar.app.programas.PantallaProgramaContenido
+import com.plataforma.bienestar.gestor.PantallaGestor
+import com.plataforma.bienestar.util.GestorXP
+import kotlinx.coroutines.CoroutineScope
 
 @Composable
 fun NavigationWrapper(
     navHostController: NavHostController,
     auth: FirebaseAuth,
     googleAuthManager: GoogleAuthManager,
-    startDestination: String = "inicio"
+    startDestination: String = "inicio",
+    scope: CoroutineScope = rememberCoroutineScope()
 ) {
     NavHost(navController = navHostController, startDestination) {
         composable("inicio") {
@@ -42,6 +47,12 @@ fun NavigationWrapper(
                         onSuccess = { user ->
                             Log.i("GoogleSignIn", "Inicio de sesión exitoso: ${user.displayName}")
                             navHostController.navigate("app") {
+                                // Xp y Logros
+                                GestorXP.registrarAccionYOtorgarXP(
+                                    usuarioId = user.uid,
+                                    evento = "iniciar_sesion",
+                                    scope = scope
+                                )
                                 popUpTo("inicio") { inclusive = true }
                             }
                         },
@@ -135,6 +146,49 @@ fun NavigationWrapper(
                 userName = userName,
                 idUsuario = currentUser.uid,
                 navController = navHostController
+            )
+        }
+
+        composable("gestor") {
+            val currentUser = auth.currentUser
+
+            if (currentUser == null) {
+                LaunchedEffect(Unit) {
+                    navHostController.navigate("inicio") {
+                        popUpTo("app") { inclusive = true }
+                    }
+                }
+                return@composable
+            }
+
+            PantallaGestor(
+                onLogout = {
+                    auth.signOut()
+                    googleAuthManager.signOut {
+                        navHostController.navigate("inicio") {
+                            popUpTo("app") { inclusive = true }
+                        }
+                    }
+                },
+                onChangePassword = { antiguaContrasena, nuevaContrasena ->
+                    val credential = EmailAuthProvider.getCredential(currentUser.email ?: "", antiguaContrasena)
+                    currentUser.reauthenticate(credential)
+                        .addOnCompleteListener { reauthTask ->
+                            if (reauthTask.isSuccessful) {
+                                currentUser.updatePassword(nuevaContrasena)
+                                    .addOnCompleteListener { updateTask ->
+                                        if (updateTask.isSuccessful) {
+                                            Log.d("PasswordUpdate", "Contraseña actualizada correctamente")
+                                        } else {
+                                            Log.e("PasswordUpdate", "Error al actualizar contraseña", updateTask.exception)
+                                        }
+                                    }
+                            } else {
+                                Log.e("Reauthentication", "Error en reautenticación", reauthTask.exception)
+                            }
+                        }
+                },
+                idUsuario = currentUser.uid
             )
         }
 

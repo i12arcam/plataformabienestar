@@ -9,6 +9,7 @@ import androidx.navigation.NavController
 import com.pierfrancescosoffritti.androidyoutubeplayer.core.player.YouTubePlayer
 import com.plataforma.bienestar.data.api.ApiClient.apiService
 import com.plataforma.bienestar.data.api.model.Recurso
+import com.plataforma.bienestar.util.GestorXP
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -60,6 +61,7 @@ fun ActividadContenido(
                         usuarioId = usuarioId,
                         recursoId = recurso.id,
                         estado = estadoActividad,
+                        dificultad = recurso.dificultad,
                         estaEnPrograma = estaEnPrograma,
                         cambiarEstadoActividadPrograma
                     )
@@ -72,6 +74,7 @@ fun ActividadContenido(
                     usuarioId = usuarioId,
                     recursoId = recurso.id,
                     estado = estadoActividad,
+                    dificultad = recurso.dificultad,
                     estaEnPrograma = estaEnPrograma,
                     cambiarEstadoActividadPrograma
                 )
@@ -90,6 +93,7 @@ fun ActividadContenido(
                             usuarioId = usuarioId,
                             recursoId = recurso.id,
                             estado = estadoActividad,
+                            dificultad = recurso.dificultad,
                             estaEnPrograma = estaEnPrograma,
                             cambiarEstadoActividadPrograma
                         )
@@ -139,8 +143,9 @@ fun actualizarEstadoActividad(
     usuarioId: String,
     recursoId: String,
     estado: EstadoActividad,
+    dificultad: String?,
     estaEnPrograma: Boolean,
-    cambiarEstadoActividadPrograma: (nuevoEstado: String) -> Unit,
+    cambiarEstadoActividadPrograma: (String) -> Unit,
     onSuccess: () -> Unit = {},
     onError: (Throwable) -> Unit = {}
 ) {
@@ -156,6 +161,14 @@ fun actualizarEstadoActividad(
                 EstadoActividad.TERMINADA -> {
                     if(!estaEnPrograma) {
                         apiService.completarActividad(usuarioId, recursoId)
+
+                        // Xp y Logros
+                        GestorXP.registrarAccionYOtorgarXP(
+                            usuarioId = usuarioId,
+                            evento = "completar_actividad",
+                            dificultad = dificultad,
+                            scope = coroutineScope
+                        )
                     }
                     cambiarEstadoActividadPrograma("completado")
                 }

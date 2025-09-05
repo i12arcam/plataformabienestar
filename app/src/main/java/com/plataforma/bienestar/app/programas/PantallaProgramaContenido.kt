@@ -24,6 +24,7 @@ import com.plataforma.bienestar.data.api.model.Programa
 import com.plataforma.bienestar.data.api.model.Recurso
 import com.plataforma.bienestar.data.api.model.UsuarioPrograma
 import com.plataforma.bienestar.ui.theme.DarkGreen
+import com.plataforma.bienestar.util.GestorXP
 import kotlinx.coroutines.launch
 
 @Composable
@@ -229,6 +230,21 @@ fun PantallaProgramaContenido(
                                                 } catch (e: Exception) {
                                                     error = "Error al actualizar el recurso: ${e.message}"
                                                 }
+                                                if(usuarioPrograma?.progreso == 100) {
+                                                    // Calcular duración total
+                                                    val duracionTotal = programa?.recursos?.sumOf { recursoPrograma ->
+                                                        // Buscar el recurso completo para obtener su duración
+                                                        val recursoCompleto = programa!!.recursos.find { it.id == recursoPrograma.id }
+                                                        recursoCompleto?.duracion ?: 5 // Default 5 si no tiene duración
+                                                    } ?: 0
+                                                    // Xp y Logros
+                                                    GestorXP.registrarAccionYOtorgarXP(
+                                                        usuarioId = usuarioId,
+                                                        evento = "completar_programa",
+                                                        duracion = duracionTotal,
+                                                        scope = coroutineScope
+                                                    )
+                                                }
                                             }
                                         }
                                     )
@@ -265,4 +281,5 @@ fun PantallaProgramaContenido(
             }
         }
     )
+    GestorXP.MostrarPopupsAutomaticos()
 }
