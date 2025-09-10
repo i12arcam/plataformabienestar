@@ -65,7 +65,7 @@ fun PantallaInicio(
         Text(
             "Supérate", color = Color.White, fontSize = 38.sp, fontWeight = FontWeight.Bold
         )
-        Spacer(modifier = Modifier.weight(1f))
+        Spacer(modifier = Modifier.weight(0.5f))
         Button(
             onClick = { navigateToSignUp() },
             modifier = Modifier
@@ -81,12 +81,6 @@ fun PantallaInicio(
             modifier = Modifier.clickable(onClick = onGoogleSignInClick),
             painterResource(id = R.drawable.googleicon),
             "Continuar con Google"
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        CustomButton(
-            Modifier.clickable { },
-            painterResource(id = R.drawable.googleicon),
-            "Continuar con Facebook"
         )
         Text(
             text = "Iniciar Sesión",

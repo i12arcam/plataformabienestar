@@ -22,6 +22,8 @@ fun PantallaApp(
     onChangePassword: (antiguaContrasena: String, nuevaContrasena: String) -> Unit,
     metodoAutenticacion: String,
     userName: String?,
+    userEmail: String?,
+    creationDate: String?,
     idUsuario: String,
     navController: NavHostController
 ) {
@@ -47,6 +49,8 @@ fun PantallaApp(
             onChangePassword = onChangePassword,
             metodoAutenticacion = metodoAutenticacion,
             userName = currentUserName,
+            userEmail = userEmail,
+            creationDate = creationDate,
             idUsuario = idUsuario,
             navController,
             onNameUpdated = { newName -> currentUserName = newName }

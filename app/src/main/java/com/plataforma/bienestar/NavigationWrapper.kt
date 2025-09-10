@@ -28,6 +28,9 @@ import com.plataforma.bienestar.app.programas.PantallaProgramaContenido
 import com.plataforma.bienestar.gestor.PantallaGestor
 import com.plataforma.bienestar.util.GestorXP
 import kotlinx.coroutines.CoroutineScope
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @Composable
 fun NavigationWrapper(
@@ -81,6 +84,8 @@ fun NavigationWrapper(
         composable("app") {
             val currentUser = auth.currentUser
             var userName by remember { mutableStateOf(currentUser?.displayName ?: "") }
+            var userEmail by remember { mutableStateOf(currentUser?.email ?: "") }
+            var creationDate by remember { mutableStateOf("") }
 
             if (currentUser == null) {
                 LaunchedEffect(Unit) {
@@ -89,6 +94,17 @@ fun NavigationWrapper(
                     }
                 }
                 return@composable
+            }
+
+            // Obtener la fecha de creación
+            LaunchedEffect(currentUser) {
+                currentUser.metadata?.let { metadata ->
+                    val timestamp = metadata.creationTimestamp
+                    val date = Date(timestamp)
+                    val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                    creationDate = formatter.format(date)
+                }
+                userEmail = currentUser.email ?: ""
             }
 
             LaunchedEffect(currentUser.displayName) {
@@ -114,7 +130,6 @@ fun NavigationWrapper(
                     ).addOnCompleteListener { task ->
                         if (task.isSuccessful) {
                             Log.d("ProfileUpdate", "Nombre actualizado correctamente")
-                            // No necesitamos actualizar userName aquí, el LaunchedEffect lo hará
                         } else {
                             Log.e("ProfileUpdate", "Error al actualizar nombre", task.exception)
                         }
@@ -144,6 +159,8 @@ fun NavigationWrapper(
                     else -> "Desconocido"
                 },
                 userName = userName,
+                userEmail = userEmail,
+                creationDate = creationDate,
                 idUsuario = currentUser.uid,
                 navController = navHostController
             )

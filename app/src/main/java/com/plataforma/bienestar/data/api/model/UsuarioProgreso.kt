@@ -4,7 +4,7 @@ data class UsuarioProgreso(
     val nivel: Int,
     val xpNivelActual: Int,
     val xpSiguienteNivel: Int,
-    val streak: Int,
+    val racha: Int,
     val xpTotal: Int,
     val logros: List<String> = emptyList()
 )

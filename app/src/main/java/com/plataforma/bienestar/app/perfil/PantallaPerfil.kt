@@ -5,11 +5,14 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,7 +35,9 @@ fun PantallaPerfil(
     onChangeName: (nuevoNombre: String) -> Unit,
     onChangePassword: (antiguaContrasena: String, nuevaContrasena: String) -> Unit,
     metodoAutenticacion: String,
-    userName: String? = null,
+    userName: String?,
+    userEmail: String?,
+    creationDate: String?,
     idUsuario: String,
     navController: NavController,
     onNameUpdated: (String) -> Unit = {},
@@ -42,6 +47,7 @@ fun PantallaPerfil(
     val emociones = remember { mutableStateListOf<EmocionGrafica>() }
     val isLoading = remember { mutableStateOf(false) }
     val error = remember { mutableStateOf<String?>(null) }
+    val hasEmocionesData = remember { mutableStateOf(false) }
 
     // Cargar emociones al iniciar
     LaunchedEffect(idUsuario) {
@@ -50,12 +56,17 @@ fun PantallaPerfil(
             val response = ApiClient.apiService.getEmocionesHistorial(idUsuario)
             emociones.clear()
             emociones.addAll(response.emociones)
-            Log.d("Emociones","emociones: $emociones")
+            hasEmocionesData.value = emociones.isNotEmpty()
             isLoading.value = false
         } catch (e: Exception) {
-            error.value = "Error al cargar emociones: ${e.message}"
+            // Solo mostrar error si es una excepción real, no cuando no hay datos
+            if (e !is retrofit2.HttpException || e.code() != 404) {
+                error.value = "Error al cargar emociones: ${e.message}"
+                Log.e("Emociones", error.value!!)
+            } else {
+                hasEmocionesData.value = false
+            }
             isLoading.value = false
-            Log.e("Emociones", error.value!!)
         }
     }
 
@@ -63,6 +74,7 @@ fun PantallaPerfil(
     val progreso = remember { mutableStateOf<UsuarioProgreso?>(null) }
     val isLoadingProgreso = remember { mutableStateOf(false) }
     val errorProgreso = remember { mutableStateOf<String?>(null) }
+    val hasProgresoData = remember { mutableStateOf(false) }
 
     // Cargar progreso al iniciar
     LaunchedEffect(idUsuario) {
@@ -70,11 +82,17 @@ fun PantallaPerfil(
         try {
             val response = ApiClient.apiService.obtenerXp(idUsuario)
             progreso.value = response
+            hasProgresoData.value = true
             isLoadingProgreso.value = false
         } catch (e: Exception) {
-            errorProgreso.value = "Error al cargar progreso: ${e.message}"
+            // Solo mostrar error si es una excepción real, no cuando no hay datos
+            if (e !is retrofit2.HttpException || e.code() != 404) {
+                errorProgreso.value = "Error al cargar progreso: ${e.message}"
+                Log.e("Progreso", errorProgreso.value!!)
+            } else {
+                hasProgresoData.value = false
+            }
             isLoadingProgreso.value = false
-            Log.e("Progreso", errorProgreso.value!!)
         }
     }
 
@@ -82,6 +100,7 @@ fun PantallaPerfil(
     val logros = remember { mutableStateListOf<Logro>() }
     val isLoadingLogros = remember { mutableStateOf(false) }
     val errorLogros = remember { mutableStateOf<String?>(null) }
+    val hasLogrosData = remember { mutableStateOf(false) }
 
     // Cargar logros al iniciar
     LaunchedEffect(idUsuario) {
@@ -90,11 +109,17 @@ fun PantallaPerfil(
             val response = ApiClient.apiService.obtenerLogrosUsuario(idUsuario)
             logros.clear()
             logros.addAll(response)
+            hasLogrosData.value = logros.isNotEmpty()
             isLoadingLogros.value = false
         } catch (e: Exception) {
-            errorLogros.value = "Error al cargar logros: ${e.message}"
+            // Solo mostrar error si es una excepción real, no cuando no hay datos
+            if (e !is retrofit2.HttpException || e.code() != 404) {
+                errorLogros.value = "Error al cargar logros: ${e.message}"
+                Log.e("Logros", errorLogros.value!!)
+            } else {
+                hasLogrosData.value = false
+            }
             isLoadingLogros.value = false
-            Log.e("Logros", errorLogros.value!!)
         }
     }
 
@@ -146,13 +171,75 @@ fun PantallaPerfil(
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Mostrar nombre de usuario
-                userName?.let { _ ->
-                    Text(
-                        text = currentUserName,
-                        style = MaterialTheme.typography.titleMedium,
-                        modifier = Modifier.padding(bottom = 16.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    // Icono de usuario
+                    Icon(
+                        imageVector = Icons.Default.Person,
+                        contentDescription = "Usuario",
+                        modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.primary
                     )
+
+                    // Información del usuario
+                    Column(
+                        modifier = Modifier.weight(1f),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        // Fila para nombre y email
+                        if (currentUserName.isNotBlank() || userEmail != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                // Nombre de usuario
+                                if (currentUserName.isNotBlank()) {
+                                    Text(
+                                        text = currentUserName,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Bold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                }
+
+                                // Separador visual
+                                if (currentUserName.isNotBlank() && userEmail != null) {
+                                    Text(
+                                        text = "•",
+                                        color = MaterialTheme.colorScheme.outline,
+                                        modifier = Modifier.padding(horizontal = 4.dp)
+                                    )
+                                }
+
+                                // Email del usuario
+                                if (userEmail != null) {
+                                    Text(
+                                        text = userEmail,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                            }
+                        }
+
+                        // Fecha de registro
+                        if (creationDate != null) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(top = 4.dp)
+                            ) {
+                                Text(
+                                    text = "Miembro desde: $creationDate",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.outline
+                                )
+                            }
+                        }
+                    }
                 }
 
                 // SECCIÓN GRÁFICAS
@@ -172,10 +259,12 @@ fun PantallaPerfil(
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(8.dp)
                     )
-                } else if (emociones.isEmpty()) {
+                } else if (!hasEmocionesData.value) {
                     Text(
-                        text = "No hay datos emocionales para mostrar",
-                        modifier = Modifier.padding(vertical = 16.dp)
+                        text = "Completa tu primer registro de emociones para ver estadísticas",
+                        modifier = Modifier.padding(vertical = 16.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
                     // Mostrar gráfica
@@ -206,13 +295,15 @@ fun PantallaPerfil(
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(8.dp)
                     )
-                } else if (progreso.value == null) {
+                } else if (!hasProgresoData.value) {
                     Text(
-                        text = "No hay datos de progreso",
-                        modifier = Modifier.padding(vertical = 16.dp)
+                        text = "Completa actividades para comenzar a ganar experiencia",
+                        modifier = Modifier.padding(vertical = 16.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
-                    // Mostrar estadísticas de progreso - Versión mejorada
+                    // Mostrar estadísticas de progreso
                     val progresoData = progreso.value!!
                     Card(
                         modifier = Modifier
@@ -259,9 +350,9 @@ fun PantallaPerfil(
                                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                     Text("Racha", style = MaterialTheme.typography.labelSmall)
                                     Text(
-                                        "${progresoData.streak} días",
+                                        "${progresoData.racha} días",
                                         style = MaterialTheme.typography.headlineSmall,
-                                        color = if (progresoData.streak > 0) MaterialTheme.colorScheme.primary
+                                        color = if (progresoData.racha > 0) MaterialTheme.colorScheme.primary
                                         else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                     )
                                 }
@@ -337,13 +428,15 @@ fun PantallaPerfil(
                         color = MaterialTheme.colorScheme.error,
                         modifier = Modifier.padding(8.dp)
                     )
-                } else if (logros.isEmpty()) {
+                } else if (!hasLogrosData.value) {
                     Text(
-                        text = "Aún no has desbloqueado logros",
-                        modifier = Modifier.padding(vertical = 16.dp)
+                        text = "¡Sigue usando la app para desbloquear tus primeros logros!",
+                        modifier = Modifier.padding(vertical = 16.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 } else {
-                    // Mostrar logros - QUITAR el modifier con altura fija
+                    // Mostrar logros
                     GridLogros(
                         logros = logros,
                         modifier = Modifier
@@ -584,6 +677,8 @@ fun PantallaPerfilPreview() {
             onChangePassword = { _, _ -> },
             metodoAutenticacion = "Correo",
             userName = "Usuario Ejemplo",
+            userEmail = "ejemplo@gmail.com",
+            creationDate = "01/01/2001",
             idUsuario = "UHbnffsmeDQHuGOY4dig8sW9yRy1",
             navController = navController
         )

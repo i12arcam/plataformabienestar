@@ -1,5 +1,6 @@
 package com.plataforma.bienestar.gestor.programas
 
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -167,10 +168,12 @@ fun PantallaGestionProgramas(
                 coroutineScope.launch {
                     updatePrograma(
                         idUsuario = idUsuario,
-                        programa = programaActualizado,  // ← Pasar ProgramaNuevo
+                        programa = programaActualizado,
                         onLoading = { isLoading = it },
-                        onSuccess = {
-                            programas = programas.map { if (it.id == programa.id) it else programa }
+                        onSuccess = { programaActualizadoRespuesta ->
+                            programas = programas.map {
+                                if (it.id == programa.id) programaActualizadoRespuesta else it
+                            }
                             showEditDialog = null
                         },
                         onError = { error = it }
@@ -232,6 +235,8 @@ private suspend fun loadProgramasYRecursos(
     try {
         val programas = ApiClient.apiServiceGestor.getProgramas(idUsuario)
         val recursos = ApiClient.apiServiceGestor.getRecursos(idUsuario)
+
+        Log.d("Programas","$programas")
         onSuccessProgramas(programas)
         onSuccessRecursos(recursos)
     } catch (e: Exception) {

@@ -21,6 +21,27 @@ fun DialogRecurso(
     onDismiss: () -> Unit,
     onConfirm: (Recurso) -> Unit
 ) {
+    val categoriaInicial = remember(recurso?.categoria) {
+        if (recurso?.categoria != null) {
+            val categorias = listOf(
+                "Afrontamiento Emocional", "Autoconocimiento", "Autoaceptacion",
+                "Desarrollo Personal", "Habilidades Sociales", "Manejo del Estres", "Meditacion",
+                "Mindfulness", "Relaciones Saludables", "Respiracion", "Sueño", "Yoga"
+            )
+            categorias.find { categoria ->
+                categoria.lowercase()
+                    .replace(" ", "")
+                    .replace("á", "a")
+                    .replace("é", "e")
+                    .replace("í", "i")
+                    .replace("ó", "o")
+                    .replace("ú", "u") == recurso.categoria
+            } ?: recurso.categoria
+        } else {
+            ""
+        }
+    }
+
     var tituloText by remember { mutableStateOf(recurso?.titulo ?: "") }
     var descripcionText by remember { mutableStateOf(recurso?.descripcion ?: "") }
     var enlaceText by remember { mutableStateOf(recurso?.enlace_contenido ?: "") }
@@ -28,6 +49,13 @@ fun DialogRecurso(
     var dificultadText by remember { mutableStateOf(recurso?.dificultad ?: "media") }
     var etiquetasText by remember { mutableStateOf(recurso?.etiquetas?.joinToString(",") ?: "") }
     var duracionText by remember { mutableStateOf(recurso?.duracion?.toString() ?: "") }
+    var categoriaText by remember { mutableStateOf(categoriaInicial) }
+
+    val categorias = listOf(
+        "Afrontamiento Emocional", "Autoconocimiento", "Autoaceptacion",
+        "Desarrollo Personal", "Habilidades Sociales", "Manejo del Estres", "Meditacion",
+        "Mindfulness", "Relaciones Saludables", "Respiracion", "Sueño", "Yoga"
+    )
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -148,6 +176,42 @@ fun DialogRecurso(
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                // Selector de categoría
+                var expandedCategoria by remember { mutableStateOf(false) }
+                Box {
+                    OutlinedTextField(
+                        value = categoriaText,
+                        onValueChange = {},
+                        label = { Text("Categoría") },
+                        modifier = Modifier.fillMaxWidth(),
+                        readOnly = true,
+                        trailingIcon = {
+                            IconButton(onClick = { expandedCategoria = true }) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowDropDown,
+                                    contentDescription = "Abrir menú"
+                                )
+                            }
+                        }
+                    )
+                    DropdownMenu(
+                        expanded = expandedCategoria,
+                        onDismissRequest = { expandedCategoria = false }
+                    ) {
+                        categorias.forEach { categoria ->
+                            DropdownMenuItem(
+                                text = { Text(categoria) },
+                                onClick = {
+                                    categoriaText = categoria
+                                    expandedCategoria = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedTextField(
                     value = etiquetasText,
                     onValueChange = { etiquetasText = it },
@@ -163,13 +227,24 @@ fun DialogRecurso(
                         .map { it.trim() }
                         .filter { it.isNotBlank() }
 
+                    // Normalizar la categoría: quitar tildes y espacios
+                    val categoriaNormalizada = categoriaText
+                        .lowercase()
+                        .replace(" ", "")
+                        .replace("á", "a")
+                        .replace("é", "e")
+                        .replace("í", "i")
+                        .replace("ó", "o")
+                        .replace("ú", "u")
+                        .ifBlank { null }
+
                     val nuevoRecurso = Recurso(
                         id = recurso?.id ?: "",
                         titulo = tituloText,
                         descripcion = descripcionText.ifBlank { null },
                         fecha_creacion = recurso?.fecha_creacion ?: "",
                         autor = recurso?.autor,
-                        categoria = recurso?.categoria,
+                        categoria = categoriaNormalizada,
                         etiquetas = etiquetas.ifEmpty { null },
                         duracion = duracionText.toIntOrNull(),
                         enlace_contenido = enlaceText,

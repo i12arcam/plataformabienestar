@@ -25,8 +25,7 @@ fun BaseScreen(
     content: @Composable (PaddingValues) -> Unit,
     selectedTab: String = "home",
     onTabSelected: (String) -> Unit,
-    showNavigationBar: Boolean = true,
-    onMenuClick: () -> Unit = {}
+    showNavigationBar: Boolean = true
 ) {
     Scaffold(
         // --- 1. TOP BAR ---
@@ -43,21 +42,6 @@ fun BaseScreen(
                         .height(80.dp),
                     contentAlignment = Alignment.Center // Centrado absoluto
                 ) {
-                    // Icono de menú (posición absoluta a la izquierda)
-                    IconButton(
-                        onClick = onMenuClick,
-                        modifier = Modifier
-                            .size(48.dp)
-                            .align(Alignment.CenterStart) // Alineado al inicio
-                            .padding(start = 16.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.desplegable),
-                            contentDescription = "Menú",
-                            tint = Color.White
-                        )
-                    }
-
                     // Título (centrado absolutamente)
                     Text(
                         text = "MindAura",
