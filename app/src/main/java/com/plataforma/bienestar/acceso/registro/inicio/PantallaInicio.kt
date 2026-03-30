@@ -91,6 +91,16 @@ fun PantallaInicio(
             fontWeight = FontWeight.Bold
         )
         Spacer(modifier = Modifier.weight(1f))
+        Text(
+            text = "Recordatorio: Esta aplicación es una herramienta de bienestar mental y emocional, pero no sustituye la atención profesional de psicólogos o psiquiatras. Si necesitas ayuda especializada, por favor consulta con un profesional de la salud mental.",
+            color = Color.White.copy(alpha = 0.8f),
+            modifier = Modifier
+                .padding(24.dp),
+            fontWeight = FontWeight.Medium,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+            lineHeight = 16.sp
+        )
     }
 }
 
